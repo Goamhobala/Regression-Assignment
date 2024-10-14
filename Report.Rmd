@@ -1,0 +1,79 @@
+---
+# The two fields that are not in the elsevier format are:
+title: STA2005S - Regression Assignment
+date: "`r Sys.Date()`"
+author:
+  - name: Jing Yeh
+    email: yhxjin001@myuct.ac.za
+  - name: Saurav Sathnarayan
+    email: sthsau001@myuct.ac.za
+
+#bibliography: mybibfile.bib
+#nocite: '@*'
+  
+#csl: https://www.zotero.org/styles/oxford-university-press-note
+#fontsize: 12pt
+#spacing: halfline # could also be oneline
+#classoptions:
+#link-citations: yes
+#urlcolor: orange
+#linkcolor: green
+#citecolor: red
+header-includes:
+ \usepackage{float}
+ \floatplacement{figure}{H}
+  \usepackage{caption}
+  \captionsetup[figure]{font=scriptsize}
+  \renewenvironment{abstract}{}{}
+  \renewenvironment{keywords}{}{}
+output:
+  rticles::oup_article:
+  oup_version: 0 # 1 = 2020 CTAN OUP CLS package; 0 = 2009 OUP CLS package
+  extra_dependencies: booktabs # for kable example
+  pdf_document:
+    fig_caption: true
+    number_sections: true
+    
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+\newpage
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Part One : Analysis
+
+# Section 1: Introduction
+
+Air pollution, particularly high levels of particulate matter (PM), is a major environmental and public health issue in South Africa’s urban centers. Exposure to elevated PM levels is linked to respiratory diseases and other serious health conditions. Understanding the factors influencing PM concentrations is crucial for developing policies that improve air quality and protect public health. This analysis seeks to identify the key drivers of air pollution in South Africa's cities, focusing on how various urban, environmental, and socioeconomic factors affect particulate matter levels.
+\
+Unknown Factors to Investigate:
+\
+Traffic Density: How do varying levels of vehicle traffic contribute to PM levels in different areas?
+\
+Industrial Activity: What is the impact of industrial activity near monitoring stations on air quality?
+\
+Temperature & Humidity: How do changes in weather conditions, like temperature and humidity, influence PM concentrations?
+\
+Wind Speed: How does wind speed affect the dispersion or accumulation of particulate matter in urban areas?
+\
+Day of the Week & Public Holidays: Do patterns of human activity on weekdays, weekends, and holidays significantly influence pollution levels?
+\
+Urban Greenery: How effective are green spaces in reducing air pollution in densely populated areas?
+
+# Objective
+\
+The goal of this analysis is to explore the relationships between PM levels and these explanatory variables. By identifying the most influential factors, we aim to inform urban planning and public health strategies that address air pollution and improve the quality of life in South African cities.
+
+
+
+## Section 2 : Data Exploration
+
+density plot
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
