@@ -41,6 +41,22 @@ editor_options:
 \newpage
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+#| results: hide
+#| warning: false
+#| message: false
+#| error: false
+if (!requireNamespace("remotes", quietly = TRUE)) {
+install.packages("remotes")
+}
+remotes::install_github("MiguelRodo/DataTidyRodoSTA2005S")
+data("data_tidy_air_quality", package = "DataTidyRodoSTA2005S")
+head(data_tidy_air_quality)
+
+library(ggplot2)
+
+library(tidyr)
+
 ```
 
 ## Part One : Analysis
@@ -74,6 +90,90 @@ The goal of this analysis is to explore the relationships between PM levels and 
 density plot
 
 ```{r pressure, echo=FALSE}
-plot(pressure)
 ```
 
+pairwsie plots
+
+```{r}
+continuous_vars <- data_tidy_air_quality[, sapply(data_tidy_air_quality, is.numeric)]
+pairs(continuous_vars, main = "Pairwise Scatterplots of Continuous Variables")
+```
+
+categorial variable plots
+
+```{r}
+data_tidy_air_quality$industrial_activity <- factor(data_tidy_air_quality$industrial_activity, 
+                                   levels = c("Low", "Medium", "High"))  # Adjust the levels according to your data
+
+data_tidy_air_quality$day_of_week <- factor(data_tidy_air_quality$day_of_week, 
+                           levels = c("Monday", "Tuesday", "Wednesday", 
+                                      "Thursday", "Friday", "Saturday", "Sunday"))
+
+data_tidy_air_quality$holiday <- factor(data_tidy_air_quality$holiday, 
+                           levels = c("Yes", "No"))
+
+categorical_vars <- names(data_tidy_air_quality)[sapply(data_tidy_air_quality, is.factor)]
+
+
+for (var in categorical_vars) {
+  plt<- ggplot(data_tidy_air_quality, aes_string(x = var, y = "particulate_matter")) +
+    geom_boxplot() +
+    labs(title = paste("Particulate Matter vs", var),
+         x = var,
+         y = "Particulate Matter") +
+    theme_minimal() 
+    
+  
+  print(plt)  # Print the plot
+}
+```
+tabular representation of relationship between categorial variables
+```{r}
+for (i in 1:(length(categorical_vars)-1)) {
+  for (j in (i+1):length(categorical_vars)) {
+    cat("Contingency Table for", categorical_vars[i], "and", categorical_vars[j], "\n")
+    print(table(data_tidy_air_quality[[categorical_vars[i]]], data_tidy_air_quality[[categorical_vars[j]]]))
+    cat("\n")
+  }
+}
+```
+visual representation of relationship between categorial variables
+```{r}
+for (i in 1:(length(categorical_vars) - 1)) {
+  for (j in (i + 1):length(categorical_vars)) {
+    # Create the plot
+    p <- ggplot(data_tidy_air_quality, aes_string(x = categorical_vars[i], fill = categorical_vars[j])) +
+      geom_bar(position = "fill") +  # Use "fill" to make it a stacked bar chart (proportions)
+      labs(title = paste("Stacked Bar Chart of", categorical_vars[i], "and", categorical_vars[j]),
+           x = categorical_vars[i],
+           y = "Proportion") +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    
+    # Print the plot
+    print(p)
+  }
+}
+```
+comments
+\
+distribution characterisitcs
+\
+The distribution of particulate matter levels is generally right-skewed, indicating that a small number of observations have significantly high levels of particulate matter while most observations are clustered at lower levels. The presence of outliers suggests variations in local conditions affecting air quality.
+\
+Observed Relationships
+\
+1. Traffic Density: A positive correlation exists between particulate matter levels and traffic density, suggesting that areas with higher vehicle traffic tend to experience elevated levels of particulate matter.
+\
+2. Urban Greenery: A negative trend is observed, where higher urban greenery correlates with lower particulate matter, indicating that vegetation may help mitigate air pollution.
+\
+3. Temperature and Wind Speed: No strong relationship was identified between particulate matter and temperature. However, there is a slight negative correlation with wind speed, indicating that higher wind speeds may help disperse particulate matter.
+
+Potential Collinearity
+\
+Some potential collinearity is observed among the explanatory variables, particularly between traffic density and urban greenery. High traffic areas often have less vegetation, leading to a relationship that may confound the analysis. Additionally, temperature and wind speed may also exhibit collinearity, as changes in one could affect the other.
+
+
+
+
+# Section 3

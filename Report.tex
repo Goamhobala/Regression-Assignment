@@ -56,6 +56,47 @@
 
 % Part for setting citation format package: biblatex
 
+% Pandoc syntax highlighting
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 
 % tightlist command for lists without linebreak
 \providecommand{\tightlist}{%
@@ -95,7 +136,7 @@
 
 \abstract{}
 
-\date{2024-10-13}
+\date{2024-10-14}
 
 \keywords{}
 
@@ -133,23 +174,170 @@ Day of the Week \& Public Holidays: Do patterns of human activity on
 weekdays, weekends, and holidays significantly influence pollution
 levels?\\
 Urban Greenery: How effective are green spaces in reducing air pollution
-in densely populated areas?\\
-\# Objective\\
+in densely populated areas?
+
+\hypertarget{objective}{%
+\section{Objective}\label{objective}}
+
+\hfill\break
 The goal of this analysis is to explore the relationships between PM
 levels and these explanatory variables. By identifying the most
 influential factors, we aim to inform urban planning and public health
 strategies that address air pollution and improve the quality of life in
 South African cities.
 
-\hypertarget{including-plots}{%
-\subsection{Including Plots}\label{including-plots}}
+\hypertarget{section-2-data-exploration}{%
+\subsection{Section 2 : Data
+Exploration}\label{section-2-data-exploration}}
 
-You can also embed plots, for example:
+density plot
 
-\includegraphics{Report_files/figure-latex/pressure-1.pdf}
+pairwsie plots
 
-Note that the \texttt{echo\ =\ FALSE} parameter was added to the code
-chunk to prevent printing of the R code that generated the plot.
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{continuous\_vars }\OtherTok{\textless{}{-}}\NormalTok{ data\_tidy\_air\_quality[, }\FunctionTok{sapply}\NormalTok{(data\_tidy\_air\_quality, is.numeric)]}
+\FunctionTok{pairs}\NormalTok{(continuous\_vars, }\AttributeTok{main =} \StringTok{"Pairwise Scatterplots of Continuous Variables"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-1-1.pdf}
+
+categorial variable plots
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{industrial\_activity }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{industrial\_activity, }
+                                   \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Low"}\NormalTok{, }\StringTok{"Medium"}\NormalTok{, }\StringTok{"High"}\NormalTok{))  }\CommentTok{\# Adjust the levels according to your data}
+
+\NormalTok{data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{day\_of\_week }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{day\_of\_week, }
+                           \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Monday"}\NormalTok{, }\StringTok{"Tuesday"}\NormalTok{, }\StringTok{"Wednesday"}\NormalTok{, }
+                                      \StringTok{"Thursday"}\NormalTok{, }\StringTok{"Friday"}\NormalTok{, }\StringTok{"Saturday"}\NormalTok{, }\StringTok{"Sunday"}\NormalTok{))}
+
+\NormalTok{data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{holiday }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{holiday, }
+                           \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Yes"}\NormalTok{, }\StringTok{"No"}\NormalTok{))}
+
+\NormalTok{categorical\_vars }\OtherTok{\textless{}{-}} \FunctionTok{names}\NormalTok{(data\_tidy\_air\_quality)[}\FunctionTok{sapply}\NormalTok{(data\_tidy\_air\_quality, is.factor)]}
+
+
+\ControlFlowTok{for}\NormalTok{ (var }\ControlFlowTok{in}\NormalTok{ categorical\_vars) \{}
+\NormalTok{  plt}\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data\_tidy\_air\_quality, }\FunctionTok{aes\_string}\NormalTok{(}\AttributeTok{x =}\NormalTok{ var, }\AttributeTok{y =} \StringTok{"particulate\_matter"}\NormalTok{)) }\SpecialCharTok{+}
+    \FunctionTok{geom\_boxplot}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Particulate Matter vs"}\NormalTok{, var),}
+         \AttributeTok{x =}\NormalTok{ var,}
+         \AttributeTok{y =} \StringTok{"Particulate Matter"}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{theme\_minimal}\NormalTok{() }
+    
+  
+  \FunctionTok{print}\NormalTok{(plt)  }\CommentTok{\# Print the plot}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: `aes_string()` was deprecated in ggplot2 3.0.0.
+## i Please use tidy evaluation idioms with `aes()`.
+## i See also `vignette("ggplot2-in-packages")` for more information.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.
+\end{verbatim}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-2-1.pdf}
+\includegraphics{Report_files/figure-latex/unnamed-chunk-2-2.pdf}
+\includegraphics{Report_files/figure-latex/unnamed-chunk-2-3.pdf}
+tabular representation of relationship between categorial variables
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\NormalTok{(}\FunctionTok{length}\NormalTok{(categorical\_vars)}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{)) \{}
+  \ControlFlowTok{for}\NormalTok{ (j }\ControlFlowTok{in}\NormalTok{ (i}\SpecialCharTok{+}\DecValTok{1}\NormalTok{)}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(categorical\_vars)) \{}
+    \FunctionTok{cat}\NormalTok{(}\StringTok{"Contingency Table for"}\NormalTok{, categorical\_vars[i], }\StringTok{"and"}\NormalTok{, categorical\_vars[j], }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+    \FunctionTok{print}\NormalTok{(}\FunctionTok{table}\NormalTok{(data\_tidy\_air\_quality[[categorical\_vars[i]]], data\_tidy\_air\_quality[[categorical\_vars[j]]]))}
+    \FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\NormalTok{  \}}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Contingency Table for industrial_activity and day_of_week 
+##         
+##          Monday Tuesday Wednesday Thursday Friday Saturday Sunday
+##   Low         5       6         4        7      6        9      4
+##   Medium      0       0         0        0      0        0      0
+##   High       11       7         9        5      8       10      6
+## 
+## Contingency Table for industrial_activity and holiday 
+##         
+##          Yes No
+##   Low     17 24
+##   Medium   0  0
+##   High    21 35
+## 
+## Contingency Table for day_of_week and holiday 
+##            
+##             Yes No
+##   Monday      1 21
+##   Tuesday     1 16
+##   Wednesday   3 23
+##   Thursday    4 19
+##   Friday      3 19
+##   Saturday   23  0
+##   Sunday     17  0
+\end{verbatim}
+
+visual representation of relationship between categorial variables
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\NormalTok{(}\FunctionTok{length}\NormalTok{(categorical\_vars) }\SpecialCharTok{{-}} \DecValTok{1}\NormalTok{)) \{}
+  \ControlFlowTok{for}\NormalTok{ (j }\ControlFlowTok{in}\NormalTok{ (i }\SpecialCharTok{+} \DecValTok{1}\NormalTok{)}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(categorical\_vars)) \{}
+    \CommentTok{\# Create the plot}
+\NormalTok{    p }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data\_tidy\_air\_quality, }\FunctionTok{aes\_string}\NormalTok{(}\AttributeTok{x =}\NormalTok{ categorical\_vars[i], }\AttributeTok{fill =}\NormalTok{ categorical\_vars[j])) }\SpecialCharTok{+}
+      \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{position =} \StringTok{"fill"}\NormalTok{) }\SpecialCharTok{+}  \CommentTok{\# Use "fill" to make it a stacked bar chart (proportions)}
+      \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Stacked Bar Chart of"}\NormalTok{, categorical\_vars[i], }\StringTok{"and"}\NormalTok{, categorical\_vars[j]),}
+           \AttributeTok{x =}\NormalTok{ categorical\_vars[i],}
+           \AttributeTok{y =} \StringTok{"Proportion"}\NormalTok{) }\SpecialCharTok{+}
+      \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+      \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{))}
+    
+    \CommentTok{\# Print the plot}
+    \FunctionTok{print}\NormalTok{(p)}
+\NormalTok{  \}}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Report_files/figure-latex/unnamed-chunk-4-1.pdf}
+\includegraphics{Report_files/figure-latex/unnamed-chunk-4-2.pdf}
+\includegraphics{Report_files/figure-latex/unnamed-chunk-4-3.pdf}
+comments\\
+distribution characterisitcs\\
+The distribution of particulate matter levels is generally right-skewed,
+indicating that a small number of observations have significantly high
+levels of particulate matter while most observations are clustered at
+lower levels. The presence of outliers suggests variations in local
+conditions affecting air quality.\\
+Observed Relationships\\
+1. Traffic Density: A positive correlation exists between particulate
+matter levels and traffic density, suggesting that areas with higher
+vehicle traffic tend to experience elevated levels of particulate
+matter.\\
+2. Urban Greenery: A negative trend is observed, where higher urban
+greenery correlates with lower particulate matter, indicating that
+vegetation may help mitigate air pollution.\\
+3. Temperature and Wind Speed: No strong relationship was identified
+between particulate matter and temperature. However, there is a slight
+negative correlation with wind speed, indicating that higher wind speeds
+may help disperse particulate matter.
+
+Potential Collinearity\\
+Some potential collinearity is observed among the explanatory variables,
+particularly between traffic density and urban greenery. High traffic
+areas often have less vegetation, leading to a relationship that may
+confound the analysis. Additionally, temperature and wind speed may also
+exhibit collinearity, as changes in one could affect the other.
 
 
 
