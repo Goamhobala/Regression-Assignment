@@ -56,6 +56,7 @@ head(data_tidy_air_quality)
 library(ggplot2)
 
 library(tidyr)
+library(kableExtra)
 
 ```
 
@@ -244,3 +245,21 @@ p_value <- pf(F_statistic, DFtreatment, DFerror, lower.tail = FALSE)
 p_value
 ```
 
+\newpage
+
+# Question 4
+```{r, echo=FALSE}
+# Question4
+multi_model <- lm(particulate_matter ~ . + temperature:humidity, data=data_tidy_air_quality)
+estimates <- as.data.frame(summary(multi_model)$coefficients)
+confint_df <- as.data.frame(confint(multi_model))
+confint_df$Estimate <- as.numeric(estimates$Estimate)
+confint_rows <-row.names(confint_df)
+row_orders = c(confint_rows[1:8], "temperature:humidity", confint_rows[10:length(confint_rows) - 1])
+confint_df_reordered <- confint_df[row_orders,c("2.5 %", "Estimate", "97.5 %")]
+
+confint_table <- kable(confint_df_reordered, digits = 4, align="c", caption="Confidence Interval for each Coefficients") |>
+  kable_styling(font_size = 12) |>
+  pack_rows(index= c("Intercept"=1, "Traffic Density"=1, "Industrial Activity"=3, "Natural Factors" = 4, "Day of Week"=6, "Holiday"=1, "Urban Greenery"=1))
+confint_table
+```

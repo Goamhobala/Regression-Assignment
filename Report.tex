@@ -105,6 +105,20 @@
 
 
 \usepackage{float} \floatplacement{figure}{H} \usepackage{caption} \captionsetup[figure]{font=scriptsize} \renewenvironment{abstract}{}{} \renewenvironment{keywords}{}{}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
 
 \begin{document}
 
@@ -136,7 +150,7 @@
 
 \abstract{}
 
-\date{2024-10-14}
+\date{2024-10-15}
 
 \keywords{}
 
@@ -146,11 +160,9 @@
 
 \newpage
 
-\hypertarget{part-one-analysis}{%
-\subsection{Part One : Analysis}\label{part-one-analysis}}
+\subsection{Part One : Analysis}\label{part-one-analysis}
 
-\hypertarget{section-1-introduction}{%
-\section{Section 1: Introduction}\label{section-1-introduction}}
+\section{Section 1: Introduction}\label{section-1-introduction}
 
 Air pollution, particularly high levels of particulate matter (PM), is a
 major environmental and public health issue in South Africa's urban
@@ -176,8 +188,7 @@ levels?\\
 Urban Greenery: How effective are green spaces in reducing air pollution
 in densely populated areas?
 
-\hypertarget{objective}{%
-\section{Objective}\label{objective}}
+\section{Objective}\label{objective}
 
 \hfill\break
 The goal of this analysis is to explore the relationships between PM
@@ -186,9 +197,8 @@ influential factors, we aim to inform urban planning and public health
 strategies that address air pollution and improve the quality of life in
 South African cities.
 
-\hypertarget{section-2-data-exploration}{%
 \subsection{Section 2 : Data
-Exploration}\label{section-2-data-exploration}}
+Exploration}\label{section-2-data-exploration}
 
 density plot
 
@@ -208,7 +218,7 @@ categorial variable plots
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{industrial\_activity }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{industrial\_activity, }
-                                   \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Low"}\NormalTok{, }\StringTok{"Medium"}\NormalTok{, }\StringTok{"High"}\NormalTok{))  }\CommentTok{\# Adjust the levels according to your data}
+                                   \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"None"}\NormalTok{,}\StringTok{"Low"}\NormalTok{, }\StringTok{"Moderate"}\NormalTok{, }\StringTok{"High"}\NormalTok{))  }\CommentTok{\# Adjust the levels according to your data}
 
 \NormalTok{data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{day\_of\_week }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{day\_of\_week, }
                            \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Monday"}\NormalTok{, }\StringTok{"Tuesday"}\NormalTok{, }\StringTok{"Wednesday"}\NormalTok{, }
@@ -262,18 +272,20 @@ tabular representation of relationship between categorial variables
 
 \begin{verbatim}
 ## Contingency Table for industrial_activity and day_of_week 
-##         
-##          Monday Tuesday Wednesday Thursday Friday Saturday Sunday
-##   Low         5       6         4        7      6        9      4
-##   Medium      0       0         0        0      0        0      0
-##   High       11       7         9        5      8       10      6
+##           
+##            Monday Tuesday Wednesday Thursday Friday Saturday Sunday
+##   None          2       0         3        3      2        0      4
+##   Low           5       6         4        7      6        9      4
+##   Moderate      4       4        10        8      6        4      3
+##   High         11       7         9        5      8       10      6
 ## 
 ## Contingency Table for industrial_activity and holiday 
-##         
-##          Yes No
-##   Low     17 24
-##   Medium   0  0
-##   High    21 35
+##           
+##            Yes No
+##   None       5  9
+##   Low       17 24
+##   Moderate   9 30
+##   High      21 35
 ## 
 ## Contingency Table for day_of_week and holiday 
 ##            
@@ -338,6 +350,189 @@ particularly between traffic density and urban greenery. High traffic
 areas often have less vegetation, leading to a relationship that may
 confound the analysis. Additionally, temperature and wind speed may also
 exhibit collinearity, as changes in one could affect the other.
+
+\section{Section 3}\label{section-3}
+
+simple linear regression
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X }\OtherTok{\textless{}{-}} \FunctionTok{cbind}\NormalTok{(}\DecValTok{1}\NormalTok{,data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{traffic\_density)}
+
+\NormalTok{Y }\OtherTok{\textless{}{-}}\NormalTok{data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{particulate\_matter}
+\NormalTok{bhat }\OtherTok{\textless{}{-}} \FunctionTok{solve}\NormalTok{(}\FunctionTok{t}\NormalTok{(X) }\SpecialCharTok{\%*\%}\NormalTok{ X) }\SpecialCharTok{\%*\%} \FunctionTok{t}\NormalTok{(X) }\SpecialCharTok{\%*\%}\NormalTok{ Y}
+
+\NormalTok{Cmat }\OtherTok{\textless{}{-}} \FunctionTok{solve}\NormalTok{(}\FunctionTok{t}\NormalTok{(X) }\SpecialCharTok{\%*\%}\NormalTok{ X)}
+
+\NormalTok{k }\OtherTok{\textless{}{-}} \FunctionTok{ncol}\NormalTok{(X)}
+\NormalTok{rss }\OtherTok{\textless{}{-}} \FunctionTok{t}\NormalTok{(Y }\SpecialCharTok{{-}}\NormalTok{ X }\SpecialCharTok{\%*\%}\NormalTok{ bhat) }\SpecialCharTok{\%*\%}\NormalTok{ (Y }\SpecialCharTok{{-}}\NormalTok{ X }\SpecialCharTok{\%*\%}\NormalTok{ bhat)}
+\CommentTok{\# Calculate s2 = RSS/(n{-}k)}
+\NormalTok{s2 }\OtherTok{\textless{}{-}} \FunctionTok{as.numeric}\NormalTok{((rss)}\SpecialCharTok{/}\DecValTok{148}\NormalTok{)}
+\NormalTok{s2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 143.5745
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{c\_ii }\OtherTok{\textless{}{-}} \FunctionTok{diag}\NormalTok{(Cmat)}
+
+\NormalTok{std.error }\OtherTok{\textless{}{-}} \FunctionTok{sqrt}\NormalTok{(s2 }\SpecialCharTok{*}\NormalTok{ c\_ii)}
+\NormalTok{std.error}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 20.37801682  0.04065266
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod1}\OtherTok{\textless{}{-}}\FunctionTok{lm}\NormalTok{(data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{particulate\_matter }\SpecialCharTok{\textasciitilde{}}\NormalTok{ data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{traffic\_density, }\AttributeTok{data =}\NormalTok{ data\_tidy\_air\_quality)}
+
+\FunctionTok{summary}\NormalTok{(mod1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = data_tidy_air_quality$particulate_matter ~ data_tidy_air_quality$traffic_density, 
+##     data = data_tidy_air_quality)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -28.332  -7.561  -1.050   6.110  35.243 
+## 
+## Coefficients:
+##                                       Estimate Std. Error t value Pr(>|t|)  
+## (Intercept)                           18.11537   20.37802   0.889   0.3755  
+## data_tidy_air_quality$traffic_density  0.08400    0.04065   2.066   0.0406 *
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 11.98 on 148 degrees of freedom
+## Multiple R-squared:  0.02804,    Adjusted R-squared:  0.02147 
+## F-statistic: 4.269 on 1 and 148 DF,  p-value: 0.04055
+\end{verbatim}
+
+hypthesis test
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Summary of ANOVA results}
+\FunctionTok{summary}\NormalTok{(}\FunctionTok{aov}\NormalTok{(particulate\_matter }\SpecialCharTok{\textasciitilde{}}\NormalTok{ industrial\_activity, }\AttributeTok{data =}\NormalTok{ data\_tidy\_air\_quality))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                      Df Sum Sq Mean Sq F value Pr(>F)   
+## industrial_activity   3   2182   727.3   5.396 0.0015 **
+## Residuals           146  19680   134.8                  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Calculate F{-}statistic and p{-}value manually}
+\NormalTok{group\_means }\OtherTok{\textless{}{-}} \FunctionTok{tapply}\NormalTok{(data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{particulate\_matter, data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{industrial\_activity, mean)}
+\NormalTok{overall\_mean }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{particulate\_matter)}
+
+\CommentTok{\# Calculate SST}
+\NormalTok{SST }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{((data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{particulate\_matter }\SpecialCharTok{{-}}\NormalTok{ overall\_mean)}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}
+
+\CommentTok{\# Calculate SSB}
+\NormalTok{n }\OtherTok{\textless{}{-}} \FunctionTok{table}\NormalTok{(data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{industrial\_activity)}
+\NormalTok{SStreatment }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{(n }\SpecialCharTok{*}\NormalTok{ (group\_means }\SpecialCharTok{{-}}\NormalTok{ overall\_mean)}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}
+
+\CommentTok{\# Calculate SSW}
+\NormalTok{group\_means\_vector }\OtherTok{\textless{}{-}} \FunctionTok{unlist}\NormalTok{(}\FunctionTok{tapply}\NormalTok{(data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{particulate\_matter, data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{industrial\_activity, mean)[data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{industrial\_activity])}
+\NormalTok{SSerror }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{((data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{particulate\_matter }\SpecialCharTok{{-}}\NormalTok{ group\_means\_vector)}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}
+
+\CommentTok{\# Calculate degrees of freedom}
+\NormalTok{k }\OtherTok{\textless{}{-}} \FunctionTok{length}\NormalTok{(}\FunctionTok{unique}\NormalTok{(data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{industrial\_activity))}
+\NormalTok{N }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(data)}
+\NormalTok{DFtreatment }\OtherTok{\textless{}{-}}\NormalTok{ k }\SpecialCharTok{{-}} \DecValTok{1}
+\NormalTok{DFerror }\OtherTok{\textless{}{-}} \DecValTok{150} \SpecialCharTok{{-}}\NormalTok{ k}
+
+\CommentTok{\# Calculate Mean Squares}
+\NormalTok{MStreatment }\OtherTok{\textless{}{-}}\NormalTok{ SStreatment }\SpecialCharTok{/}\NormalTok{ DFtreatment}
+\NormalTok{MSerror }\OtherTok{\textless{}{-}}\NormalTok{ SSerror }\SpecialCharTok{/}\NormalTok{ DFerror}
+
+
+\CommentTok{\# Calculate F{-}statistic}
+\NormalTok{F\_statistic }\OtherTok{\textless{}{-}}\NormalTok{ MStreatment}\SpecialCharTok{/}\NormalTok{MSerror}
+
+\CommentTok{\# Output F{-}statistic}
+\NormalTok{F\_statistic}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 5.395959
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Calculate p{-}value}
+\NormalTok{p\_value }\OtherTok{\textless{}{-}} \FunctionTok{pf}\NormalTok{(F\_statistic, DFtreatment, DFerror, }\AttributeTok{lower.tail =} \ConstantTok{FALSE}\NormalTok{)}
+\NormalTok{p\_value}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.001502236
+\end{verbatim}
+
+\newpage
+
+\section{Question 4}\label{question-4}
+
+\begingroup\fontsize{12}{14}\selectfont
+
+\begin{longtable}[t]{lccc}
+\caption{\label{tab:unnamed-chunk-7}Confidence Interval for each Coefficients}\\
+\toprule
+ & 2.5 \% & Estimate & 97.5 \%\\
+\midrule
+\addlinespace[0.3em]
+\multicolumn{4}{l}{\textbf{Intercept}}\\
+\hspace{1em}(Intercept) & -21.0568 & 13.7937 & 48.6442\\
+\addlinespace[0.3em]
+\multicolumn{4}{l}{\textbf{Traffic Density}}\\
+\hspace{1em}traffic\_density & 0.0155 & 0.0799 & 0.1444\\
+\addlinespace[0.3em]
+\multicolumn{4}{l}{\textbf{Industrial Activity}}\\
+\hspace{1em}industrial\_activityLow & -3.1721 & 2.6589 & 8.4900\\
+\hspace{1em}industrial\_activityModerate & 0.6047 & 6.4545 & 12.3043\\
+\hspace{1em}industrial\_activityHigh & -0.2503 & 5.3652 & 10.9806\\
+\addlinespace[0.3em]
+\multicolumn{4}{l}{\textbf{Natural Factors}}\\
+\hspace{1em}temperature & -1.1521 & -0.2815 & 0.5891\\
+\hspace{1em}humidity & -0.1111 & 0.1926 & 0.4962\\
+\hspace{1em}wind\_speed & -0.8040 & 0.0193 & 0.8426\\
+\hspace{1em}temperature:humidity & -0.0088 & 0.0061 & 0.0209\\
+\addlinespace[0.3em]
+\multicolumn{4}{l}{\textbf{Day of Week}}\\
+\hspace{1em}day\_of\_weekTuesday & -5.9877 & 0.0133 & 6.0142\\
+\hspace{1em}day\_of\_weekWednesday & -5.3501 & 0.1565 & 5.6630\\
+\hspace{1em}day\_of\_weekThursday & -5.5367 & 0.1662 & 5.8690\\
+\hspace{1em}day\_of\_weekFriday & -8.0602 & -2.4221 & 3.2161\\
+\hspace{1em}day\_of\_weekSaturday & -12.3605 & -4.4832 & 3.3940\\
+\hspace{1em}day\_of\_weekSunday & -10.2167 & -2.0885 & 6.0396\\
+\addlinespace[0.3em]
+\multicolumn{4}{l}{\textbf{Holiday}}\\
+\hspace{1em}holidayNo & -6.7151 & -0.9961 & 4.7228\\
+\addlinespace[0.3em]
+\multicolumn{4}{l}{\textbf{Urban Greenery}}\\
+\hspace{1em}urban\_greenery & -0.4142 & -0.2954 & -0.1766\\
+\bottomrule
+\end{longtable}
+\endgroup{}
 
 
 
