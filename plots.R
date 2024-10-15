@@ -15,6 +15,8 @@ mean_particle <- mean(data_tidy_air_quality$particulate_matter)
 sd_particle <- sd(data_tidy_air_quality$particulate_matter)
 
 ggplot(data_tidy_air_quality, aes(x=particulate_matter))+
-  geom_histogram(fill="deepskyblue", color="black", binwidth = 3, aes(y=..density..))+
+  geom_histogram(fill="deepskyblue3", color="black", binwidth = 3, aes(y=..density..))+
   stat_function(fun=dnorm, args=list(mean=mean_particle, sd=sd_particle), color="firebrick4", size=1.2)+
   labs(title="Density Plot of Particulate Matter", y="Density", x="Particulate Matter")
+
+multi_model <- lm(particulate_matter ~ . + temperature:humidity, data=data_tidy_air_quality)
