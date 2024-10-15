@@ -103,7 +103,7 @@ categorial variable plots
 
 ```{r}
 data_tidy_air_quality$industrial_activity <- factor(data_tidy_air_quality$industrial_activity, 
-                                   levels = c("Low", "Medium", "High"))  # Adjust the levels according to your data
+                                   levels = c("None","Low", "Moderate", "High"))  # Adjust the levels according to your data
 
 data_tidy_air_quality$day_of_week <- factor(data_tidy_air_quality$day_of_week, 
                            levels = c("Monday", "Tuesday", "Wednesday", 
@@ -177,3 +177,70 @@ Some potential collinearity is observed among the explanatory variables, particu
 
 
 # Section 3
+simple linear regression
+```{r}
+X <- cbind(1,data_tidy_air_quality$traffic_density)
+
+Y <-data_tidy_air_quality$particulate_matter
+bhat <- solve(t(X) %*% X) %*% t(X) %*% Y
+
+Cmat <- solve(t(X) %*% X)
+
+k <- ncol(X)
+rss <- t(Y - X %*% bhat) %*% (Y - X %*% bhat)
+# Calculate s2 = RSS/(n-k)
+s2 <- as.numeric((rss)/148)
+s2
+
+c_ii <- diag(Cmat)
+
+std.error <- sqrt(s2 * c_ii)
+std.error
+mod1<-lm(data_tidy_air_quality$particulate_matter ~ data_tidy_air_quality$traffic_density, data = data_tidy_air_quality)
+
+summary(mod1)
+```
+hypthesis test
+```{r}
+
+
+# Summary of ANOVA results
+summary(aov(particulate_matter ~ industrial_activity, data = data_tidy_air_quality))
+
+# Calculate F-statistic and p-value manually
+group_means <- tapply(data_tidy_air_quality$particulate_matter, data_tidy_air_quality$industrial_activity, mean)
+overall_mean <- mean(data_tidy_air_quality$particulate_matter)
+
+# Calculate SST
+SST <- sum((data_tidy_air_quality$particulate_matter - overall_mean)^2)
+
+# Calculate SSB
+n <- table(data_tidy_air_quality$industrial_activity)
+SStreatment <- sum(n * (group_means - overall_mean)^2)
+
+# Calculate SSW
+group_means_vector <- unlist(tapply(data_tidy_air_quality$particulate_matter, data_tidy_air_quality$industrial_activity, mean)[data_tidy_air_quality$industrial_activity])
+SSerror <- sum((data_tidy_air_quality$particulate_matter - group_means_vector)^2)
+
+# Calculate degrees of freedom
+k <- length(unique(data_tidy_air_quality$industrial_activity))
+N <- nrow(data)
+DFtreatment <- k - 1
+DFerror <- 150 - k
+
+# Calculate Mean Squares
+MStreatment <- SStreatment / DFtreatment
+MSerror <- SSerror / DFerror
+
+
+# Calculate F-statistic
+F_statistic <- MStreatment/MSerror
+
+# Output F-statistic
+F_statistic
+
+# Calculate p-value
+p_value <- pf(F_statistic, DFtreatment, DFerror, lower.tail = FALSE)
+p_value
+```
+
