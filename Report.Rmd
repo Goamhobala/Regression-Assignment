@@ -263,3 +263,32 @@ confint_table <- kable(confint_df_reordered, digits = 4, align="c", caption="Con
   pack_rows(index= c("Intercept"=1, "Traffic Density"=1, "Industrial Activity"=3, "Natural Factors" = 4, "Day of Week"=6, "Holiday"=1, "Urban Greenery"=1))
 confint_table
 ```
+
+### Hypothesis Testing
+We'd like to perform hypothesis tests on the following variables: Temperature, Humidity, Industrial Levels, and Day of Week.
+
+We'll start by examining whether Temperature has an effect on the concentration of Particulate Matter. We'll use the following We use the following set of hypothesis:
+\begin{align}
+\[&H_0: \beta_{temp} = \beta_{hum:temp} = 0 \\ 
+&H_A: \beta_{temp} \neq 0 \text{ and } \beta_{hum:temp} \neq 0\]
+\end{align}
+This can be done by comparing the restricted and un restricted model:
+\[Y_R = \beta_0 + \beta_{traffic}X + \]
+
+
+```{r}
+model_unrestricted <- lm(particulate_matter ~ . + 
+                         temperature:humidity,
+                         data=data_tidy_air_quality)
+model_restricted <- update(model_unrestricted, .~.
+                           - temperature
+                           - temperature:humidity)
+anova(model_unrestricted, model_restricted)
+ 
+
+```
+Using the anova function in R, we compare the two models with F test, yielding a P value 0.6815, suggesting that temperature doesn't have a significant effect on the concentration of particular matter.
+
+
+
+

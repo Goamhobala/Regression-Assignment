@@ -1,4 +1,4 @@
-library(tidyverse)
+library(ggplot2)
 library(kableExtra)
 #| results: hide
 #| warning: false
@@ -34,4 +34,7 @@ confint_df_reordered <- confint_df[row_orders,c("2.5 %", "Estimate", "97.5 %")]
 confint_table <- kable(confint_df_reordered, digits = 4, align="c") |>
   kable_styling(font_size = 12) |>
   pack_rows(index= c("Intercept"=1, "Traffic Density"=1, "Industrial Activity"=3, "Natural Factors" = 4, "Day of Week"=6, "Holiday"=1, "Urban Greenery"=1))
-  
+
+
+model_restricted <- update(multi_model, .~. - temperature - temperature:humidity)
+ 

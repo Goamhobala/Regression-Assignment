@@ -102,6 +102,17 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
+% From pandoc table feature
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
 
 
 \usepackage{float} \floatplacement{figure}{H} \usepackage{caption} \captionsetup[figure]{font=scriptsize} \renewenvironment{abstract}{}{} \renewenvironment{keywords}{}{}
@@ -150,7 +161,7 @@
 
 \abstract{}
 
-\date{2024-10-15}
+\date{2024-10-16}
 
 \keywords{}
 
@@ -160,9 +171,11 @@
 
 \newpage
 
-\subsection{Part One : Analysis}\label{part-one-analysis}
+\hypertarget{part-one-analysis}{%
+\subsection{Part One : Analysis}\label{part-one-analysis}}
 
-\section{Section 1: Introduction}\label{section-1-introduction}
+\hypertarget{section-1-introduction}{%
+\section{Section 1: Introduction}\label{section-1-introduction}}
 
 Air pollution, particularly high levels of particulate matter (PM), is a
 major environmental and public health issue in South Africa's urban
@@ -188,7 +201,8 @@ levels?\\
 Urban Greenery: How effective are green spaces in reducing air pollution
 in densely populated areas?
 
-\section{Objective}\label{objective}
+\hypertarget{objective}{%
+\section{Objective}\label{objective}}
 
 \hfill\break
 The goal of this analysis is to explore the relationships between PM
@@ -197,8 +211,9 @@ influential factors, we aim to inform urban planning and public health
 strategies that address air pollution and improve the quality of life in
 South African cities.
 
+\hypertarget{section-2-data-exploration}{%
 \subsection{Section 2 : Data
-Exploration}\label{section-2-data-exploration}
+Exploration}\label{section-2-data-exploration}}
 
 density plot
 
@@ -351,7 +366,8 @@ areas often have less vegetation, leading to a relationship that may
 confound the analysis. Additionally, temperature and wind speed may also
 exhibit collinearity, as changes in one could affect the other.
 
-\section{Section 3}\label{section-3}
+\hypertarget{section-3}{%
+\section{Section 3}\label{section-3}}
 
 simple linear regression
 
@@ -490,7 +506,8 @@ hypthesis test
 
 \newpage
 
-\section{Question 4}\label{question-4}
+\hypertarget{question-4}{%
+\section{Question 4}\label{question-4}}
 
 \begingroup\fontsize{12}{14}\selectfont
 
@@ -533,6 +550,47 @@ hypthesis test
 \bottomrule
 \end{longtable}
 \endgroup{}
+
+\hypertarget{hypothesis-testing}{%
+\subsubsection{Hypothesis Testing}\label{hypothesis-testing}}
+
+We'd like to perform hypothesis tests on the following variables:
+Temperature, Humidity, Industrial Levels, and Day of Week.
+
+We'll start by examining whether Temperature has an effect on the
+concentration of Particulate Matter. We'll use the following We use the
+following set of hypothesis: \begin{align}
+\[&H_0: \beta_{temp} = \beta_{hum:temp} = 0 \\ 
+&H_A: \beta_{temp} \neq 0 \text{ and } \beta_{hum:temp} \neq 0\]
+\end{align} This can be done by comparing the restricted and un
+restricted model: \[Y_R = \beta_0 + \beta_{traffic}X + \]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model\_unrestricted }\OtherTok{\textless{}{-}} \FunctionTok{lm}\NormalTok{(particulate\_matter }\SpecialCharTok{\textasciitilde{}}\NormalTok{ . }\SpecialCharTok{+} 
+\NormalTok{                         temperature}\SpecialCharTok{:}\NormalTok{humidity,}
+                         \AttributeTok{data=}\NormalTok{data\_tidy\_air\_quality)}
+\NormalTok{model\_restricted }\OtherTok{\textless{}{-}} \FunctionTok{update}\NormalTok{(model\_unrestricted, .}\SpecialCharTok{\textasciitilde{}}\NormalTok{.}
+                           \SpecialCharTok{{-}}\NormalTok{ temperature}
+                           \SpecialCharTok{{-}}\NormalTok{ temperature}\SpecialCharTok{:}\NormalTok{humidity)}
+\FunctionTok{kable}\NormalTok{(}\FunctionTok{anova}\NormalTok{(model\_unrestricted, model\_restricted))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}rrrrrr@{}}
+\toprule\noalign{}
+Res.Df & RSS & Df & Sum of Sq & F & Pr(\textgreater F) \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+133 & 11032.02 & NA & NA & NA & NA \\
+135 & 11095.83 & -2 & -63.80113 & 0.3845872 & 0.6814861 \\
+\end{longtable}
+
+Using the anova function in R, we compare the two models with F test,
+yielding a P value 0.6815, suggesting that temperature doesn't have a
+significant effect on the concentration of particular matter.
 
 
 
