@@ -7,7 +7,6 @@ author:
     email: yhxjin001@myuct.ac.za
   - name: Saurav Sathnarayan
     email: sthsau001@myuct.ac.za
-
 #bibliography: mybibfile.bib
 #nocite: '@*'
   
@@ -24,16 +23,15 @@ header-includes:
  \floatplacement{figure}{H}
   \usepackage{caption}
   \captionsetup[figure]{font=scriptsize}
-  \renewenvironment{abstract}{}{}
-  \renewenvironment{keywords}{}{}
+
 output:
-  rticles::oup_article:
-  oup_version: 0 # 1 = 2020 CTAN OUP CLS package; 0 = 2009 OUP CLS package
-  extra_dependencies: booktabs # for kable example
   pdf_document:
+    
     fig_caption: true
     number_sections: true
-    
+  oup_version: 0 # 1 = 2020 CTAN OUP CLS package; 0 = 2009 OUP CLS package
+  extra_dependencies: booktabs # for kable example
+  rticles::oup_article:
 editor_options: 
   markdown: 
     wrap: 72
@@ -54,10 +52,8 @@ data("data_tidy_air_quality", package = "DataTidyRodoSTA2005S")
 head(data_tidy_air_quality)
 
 library(ggplot2)
-
 library(tidyr)
 library(kableExtra)
-
 ```
 
 ## Part One : Analysis
@@ -268,12 +264,17 @@ confint_table
 We'd like to perform hypothesis tests on the following variables: Temperature, Humidity, Industrial Levels, and Day of Week.
 
 We'll start by examining whether Temperature has an effect on the concentration of Particulate Matter. We'll use the following We use the following set of hypothesis:
-\begin{align}
-\[&H_0: \beta_{temp} = \beta_{hum:temp} = 0 \\ 
-&H_A: \beta_{temp} \neq 0 \text{ and } \beta_{hum:temp} \neq 0\]
-\end{align}
-This can be done by comparing the restricted and un restricted model:
-\[Y_R = \beta_0 + \beta_{traffic}X + \]
+```{r}
+#\begin{align}
+#$$H_0: \beta_{temp} = \beta_{hum:temp} = 0$$ 
+#$$H_A: \beta_{temp} \neq 0 \text{ and } \beta_{hum:temp} \neq 0$$
+#\end{align}
+#\
+#This can be done by comparing the restricted and un restricted model:
+#$$Y_R = \beta_0 + \beta_{traffic}X + $$
+```
+
+
 
 
 ```{r}
@@ -291,4 +292,154 @@ Using the anova function in R, we compare the two models with F test, yielding a
 
 
 
+# part 2
+scenario A
+
+```{r}
+library(tidyverse)
+
+# Set the seed for reproducibility
+set.seed(123)
+
+# Number of simulations
+n_simulations <- 1000
+
+temperature <- data_tidy_air_quality$temperature
+
+# Initialize a vector to store whether the null hypothesis was rejected in each simulation
+reject_null <- numeric(n_simulations)
+
+
+# Variance of the uniform distribution needs to be 100, so we calculated b = 17.32
+a <- -17.32
+b <- 17.32
+
+# Run simulations
+for (i in 1:n_simulations) {
+  
+  # Generate error term e ~ Uniform(a, b)
+  e <- runif(length(temperature), min = a, max = b)
+  
+  # Generate Y = 30 + e (since β1 = 0)
+  Y <- 30 + e
+  
+  
+  # Fit the linear model Y = β0 + β1 * temperature
+  model <- lm(Y ~ temperature)
+  
+  # Perform hypothesis test on β1 (null hypothesis: β1 = 0) and extract from lm
+  p_value <- summary(model)$coefficients[2, 4]
+  p_value
+  
+  # Record if the null hypothesis is rejected (α = 0.05)
+  reject_null[i] <- ifelse(p_value < 0.05, 1, 0)
+
+  }
+
+# Calculate Type I error rate (proportion of times the null was incorrectly rejected)
+type_1_error_rate <-(1000-sum(reject_null))/1000
+
+# Output the Type I error rate
+
+type_1_error_rate
+```
+Methodology for Scenario A:
+Simulation under the null hypothesis ($\beta_{1}$ = 0):
+We simulate the model assuming there is no effect of temperature on particulate matter (i.e., $\beta_{1}$ = 0). Hence, the model simplifies to:
+\begin{align}
+$$Y_{i}= 30 + e_{i} $$
+\end{align}
+
+
+
+
+
+
+scenario b
+```{r}
+set.seed(123)  # For reproducibility
+
+# Load data (assuming temperature values are stored in 'temperature' variable)
+temperature <- data_tidy_air_quality$temperature
+
+n <- length(temperature)  # Number of observations in temperature data
+
+
+reject_null <- numeric(n_simulations)  # To store whether the null hypothesis is rejected
+
+for (i in 1:n_simulations) {
+  # Simulate heteroscedastic errors with mean variance 100 and variance of the variances = 50
+  # Generate different variances for each observation, ensuring mean is 100 and variance is 50
+  variances <- rnorm(n, mean = 100, sd = sqrt(50))  # Variance of each error term
+  e <- rnorm(n, mean = 0, sd = sqrt(abs(variances)))  # Simulated errors with heteroscedasticity
+  
+  # Generate Y values under null hypothesis (beta_1 = 0)
+  Y <- 30 + e
+  
+  # Fit the model Y ~ temperature
+  model <- lm(Y ~ temperature)
+  
+  # Perform hypothesis test for beta_1 (test if beta_1 = 0)
+  p_value <- summary(model)$coefficients[2, 4]  # Extract p-value for temperature coefficient
+  
+  # Record whether the null hypothesis is rejected (p-value < 0.05)
+  reject_null[i] <- as.numeric(p_value < 0.05)
+}
+
+# Calculate the Type I error rate (proportion of rejected null hypotheses)
+type_1_error_rate <- (1000-sum(reject_null))/1000
+
+# Print the Type I error rate
+type_1_error_rate
+```
+scenario C
+```{r}
+set.seed(123)  # For reproducibility
+
+# Load data (assuming temperature values are stored in 'temperature' variable)
+temperature <- data_tidy_air_quality$temperature
+
+n <- length(temperature)  # Number of observations in temperature data
+n_sim <- 1000  # Number of simulations
+
+# Function to generate autocorrelated errors
+generate_ar1_errors <- function(n, rho, var_epsilon) {
+  sigma_u_squared <- var_epsilon * (1 - rho^2)
+  u <- rnorm(n, mean = 0, sd = sqrt(sigma_u_squared))
+  epsilon <- numeric(n)
+  epsilon[1] <- u[1]
+  for (i in 2:n) {
+    epsilon[i] <- rho * epsilon[i - 1] + u[i]
+  }
+  epsilon
+}
+
+rho <- 0.3  # Autocorrelation coefficient
+var_epsilon <- 100  # Desired variance of errors
+
+reject_null <- numeric(n_sim)  # To store whether the null hypothesis is rejected
+
+for (i in 1:n_sim) {
+  # Generate autocorrelated errors with Corr(epsilon_i, epsilon_(i+1)) = 0.3
+  e <- generate_ar1_errors(n, rho, var_epsilon)
+  
+  # Generate Y values under null hypothesis (beta_1 = 0)
+  Y <- 30 + e
+  
+  # Fit the model Y ~ temperature
+  model <- lm(Y ~ temperature)
+  
+  # Perform hypothesis test for beta_1 (test if beta_1 = 0)
+  p_value <- summary(model)$coefficients[2, 4]  # Extract p-value for temperature coefficient
+  
+  # Record whether the null hypothesis is rejected (p-value < 0.05)
+  reject_null[i] <- as.numeric(p_value < 0.05)
+}
+
+# Calculate the Type I error rate (proportion of rejected null hypotheses)
+type_1_error_rate <- (1000-sum(reject_null))/1000
+
+# Print the Type I error rate
+type_1_error_rate
+```
 

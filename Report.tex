@@ -1,62 +1,42 @@
-
-\documentclass[12pt,halfline,a4paper,]{ouparticle}
-
-% Packages I think are necessary for basic Rmarkdown functionality
-\usepackage{hyperref}
-\usepackage{graphicx}
-\usepackage{listings}
-\usepackage{xcolor}
-\usepackage{fancyvrb}
-\usepackage{framed}
-
-% Link coloring
-\hypersetup{breaklinks=true,
-            bookmarks=true,
-            pdfauthor={},
-            pdftitle={STA2005S - Regression Assignment}
-            }
-
-
-%% To allow better options for figure placement
-%\usepackage{float}
-
-% Packages that are supposedly required by OUP sty file
-\usepackage{amssymb, amsmath, geometry, amsfonts, verbatim, endnotes, setspace}
-
-% use upquote if available, for straight quotes in verbatim environments
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
-
-% Macros for dealing with affiliations, footnotes, etc.
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
 \makeatletter
-\def\Newlabel#1#2#3{\expandafter\gdef\csname #1@#2\endcsname{#3}}
-
-\def\Ref#1#2{\@ifundefined{#1@#2}{???}{\csname #1@#2\endcsname}}
-
-\newcommand*\samethanks[1][\value{footnote}]{\footnotemark[#1]}
-
-\newcommand*\ifcounter[1]{%
-  \ifcsname c@#1\endcsname
-    \expandafter\@firstoftwo
-  \else
-    \expandafter\@secondoftwo
-  \fi
-}
-
-\newcommand*\thanksbycode[1]{%
-  \ifcounter{FNCT@#1}
-    {\samethanks[\value{FNCT@#1}]}
-    {\thanks{\Ref{FN}{#1}}\newcounter{FNCT@#1}\setcounter{FNCT@#1}{\value{footnote}}}
-}
-
-% Create labels for Addresses if the are given in Elsevier format
-
-% Create labels for Footnotes if the are given in Elsevier format
-
-% Part for setting citation format package: natbib
-
-% Part for setting citation format package: biblatex
-
-% Pandoc syntax highlighting
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
 \usepackage{color}
 \usepackage{fancyvrb}
 \newcommand{\VerbBar}{|}
@@ -97,25 +77,24 @@
 \newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
 \newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
 \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-
-% tightlist command for lists without linebreak
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-
-% From pandoc table feature
-\usepackage{longtable,booktabs,array}
-\usepackage{calc} % for calculating minipage widths
-% Correct order of tables after \paragraph or \subparagraph
-\usepackage{etoolbox}
-\makeatletter
-\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
-\makeatother
-% Allow footnotes in longtable head/foot
-\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
-\makesavenoteenv{longtable}
-
-
-\usepackage{float} \floatplacement{figure}{H} \usepackage{caption} \captionsetup[figure]{font=scriptsize} \renewenvironment{abstract}{}{} \renewenvironment{keywords}{}{}
+\setcounter{secnumdepth}{5}
+\usepackage{float} \floatplacement{figure}{H} \usepackage{caption} \captionsetup[figure]{font=scriptsize}
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{array}
@@ -130,44 +109,23 @@
 \usepackage[normalem]{ulem}
 \usepackage{makecell}
 \usepackage{xcolor}
-
-\begin{document}
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={STA2005S - Regression Assignment},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
 
 \title{STA2005S - Regression Assignment}
-
-\author{%
-%
-% Code for old style authors field
-%
-% Add \and if both authors and author
-%
-%
-% Code for new (elsevier) style author field
-\name{Jing Yeh}
-%
-\email{\href{mailto:yhxjin001@myuct.ac.za}{yhxjin001@myuct.ac.za}}%
-%
-%
-%
-\and
-\name{Saurav Sathnarayan}
-%
-\email{\href{mailto:sthsau001@myuct.ac.za}{sthsau001@myuct.ac.za}}%
-%
-%
-%
-%
-}
-
-\abstract{}
-
+\author{true \and true}
 \date{2024-10-16}
 
-\keywords{}
-
+\begin{document}
 \maketitle
-
-
 
 \newpage
 
@@ -559,11 +517,19 @@ Temperature, Humidity, Industrial Levels, and Day of Week.
 
 We'll start by examining whether Temperature has an effect on the
 concentration of Particulate Matter. We'll use the following We use the
-following set of hypothesis: \begin{align}
-\[&H_0: \beta_{temp} = \beta_{hum:temp} = 0 \\ 
-&H_A: \beta_{temp} \neq 0 \text{ and } \beta_{hum:temp} \neq 0\]
-\end{align} This can be done by comparing the restricted and un
-restricted model: \[Y_R = \beta_0 + \beta_{traffic}X + \]
+following set of hypothesis:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#\textbackslash{}begin\{align\}}
+\CommentTok{\#$$H\_0: \textbackslash{}beta\_\{temp\} = \textbackslash{}beta\_\{hum:temp\} = 0$$ }
+\CommentTok{\#$$H\_A: \textbackslash{}beta\_\{temp\} \textbackslash{}neq 0 \textbackslash{}text\{ and \} \textbackslash{}beta\_\{hum:temp\} \textbackslash{}neq 0$$}
+\CommentTok{\#\textbackslash{}end\{align\}}
+\CommentTok{\#\textbackslash{}}
+\CommentTok{\#This can be done by comparing the restricted and un restricted model:}
+\CommentTok{\#$$Y\_R = \textbackslash{}beta\_0 + \textbackslash{}beta\_\{traffic\}X + $$}
+\end{Highlighting}
+\end{Shaded}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -573,28 +539,220 @@ restricted model: \[Y_R = \beta_0 + \beta_{traffic}X + \]
 \NormalTok{model\_restricted }\OtherTok{\textless{}{-}} \FunctionTok{update}\NormalTok{(model\_unrestricted, .}\SpecialCharTok{\textasciitilde{}}\NormalTok{.}
                            \SpecialCharTok{{-}}\NormalTok{ temperature}
                            \SpecialCharTok{{-}}\NormalTok{ temperature}\SpecialCharTok{:}\NormalTok{humidity)}
-\FunctionTok{kable}\NormalTok{(}\FunctionTok{anova}\NormalTok{(model\_unrestricted, model\_restricted))}
+\FunctionTok{anova}\NormalTok{(model\_unrestricted, model\_restricted)}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{longtable}[]{@{}rrrrrr@{}}
-\toprule\noalign{}
-Res.Df & RSS & Df & Sum of Sq & F & Pr(\textgreater F) \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-133 & 11032.02 & NA & NA & NA & NA \\
-135 & 11095.83 & -2 & -63.80113 & 0.3845872 & 0.6814861 \\
-\end{longtable}
+\begin{verbatim}
+## Analysis of Variance Table
+## 
+## Model 1: particulate_matter ~ traffic_density + industrial_activity + 
+##     temperature + humidity + wind_speed + day_of_week + holiday + 
+##     urban_greenery + temperature:humidity
+## Model 2: particulate_matter ~ traffic_density + industrial_activity + 
+##     humidity + wind_speed + day_of_week + holiday + urban_greenery
+##   Res.Df   RSS Df Sum of Sq      F Pr(>F)
+## 1    133 11032                           
+## 2    135 11096 -2   -63.801 0.3846 0.6815
+\end{verbatim}
 
 Using the anova function in R, we compare the two models with F test,
 yielding a P value 0.6815, suggesting that temperature doesn't have a
 significant effect on the concentration of particular matter.
 
+\hypertarget{part-2}{%
+\section{part 2}\label{part-2}}
+
+scenario A
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tidyverse)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'tidyverse' was built under R version 4.3.3
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'lubridate' was built under R version 4.3.3
+\end{verbatim}
+
+\begin{verbatim}
+## -- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --
+## v dplyr     1.1.2     v readr     2.1.4
+## v forcats   1.0.0     v stringr   1.5.0
+## v lubridate 1.9.3     v tibble    3.2.1
+## v purrr     1.0.2     
+## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
+## x dplyr::filter()     masks stats::filter()
+## x dplyr::group_rows() masks kableExtra::group_rows()
+## x dplyr::lag()        masks stats::lag()
+## i Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Set the seed for reproducibility}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+
+\CommentTok{\# Number of simulations}
+\NormalTok{n\_simulations }\OtherTok{\textless{}{-}} \DecValTok{1000}
+
+\NormalTok{temperature }\OtherTok{\textless{}{-}}\NormalTok{ data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{temperature}
+
+\CommentTok{\# Initialize a vector to store whether the null hypothesis was rejected in each simulation}
+\NormalTok{reject\_null }\OtherTok{\textless{}{-}} \FunctionTok{numeric}\NormalTok{(n\_simulations)}
 
 
+\CommentTok{\# Variance of the uniform distribution needs to be 100, so we calculated b = 17.32}
+\NormalTok{a }\OtherTok{\textless{}{-}} \SpecialCharTok{{-}}\FloatTok{17.32}
+\NormalTok{b }\OtherTok{\textless{}{-}} \FloatTok{17.32}
+
+\CommentTok{\# Run simulations}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\NormalTok{n\_simulations) \{}
+  
+  \CommentTok{\# Generate error term e \textasciitilde{} Uniform(a, b)}
+\NormalTok{  e }\OtherTok{\textless{}{-}} \FunctionTok{runif}\NormalTok{(}\FunctionTok{length}\NormalTok{(temperature), }\AttributeTok{min =}\NormalTok{ a, }\AttributeTok{max =}\NormalTok{ b)}
+  
+  \CommentTok{\# Generate Y = 30 + e (since β1 = 0)}
+\NormalTok{  Y }\OtherTok{\textless{}{-}} \DecValTok{30} \SpecialCharTok{+}\NormalTok{ e}
+  
+  
+  \CommentTok{\# Fit the linear model Y = β0 + β1 * temperature}
+\NormalTok{  model }\OtherTok{\textless{}{-}} \FunctionTok{lm}\NormalTok{(Y }\SpecialCharTok{\textasciitilde{}}\NormalTok{ temperature)}
+  
+  \CommentTok{\# Perform hypothesis test on β1 (null hypothesis: β1 = 0) and extract from lm}
+\NormalTok{  p\_value }\OtherTok{\textless{}{-}} \FunctionTok{summary}\NormalTok{(model)}\SpecialCharTok{$}\NormalTok{coefficients[}\DecValTok{2}\NormalTok{, }\DecValTok{4}\NormalTok{]}
+\NormalTok{  p\_value}
+  
+  \CommentTok{\# Record if the null hypothesis is rejected (α = 0.05)}
+\NormalTok{  reject\_null[i] }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(p\_value }\SpecialCharTok{\textless{}} \FloatTok{0.05}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{)}
+
+\NormalTok{  \}}
+
+\CommentTok{\# Calculate Type I error rate (proportion of times the null was incorrectly rejected)}
+\NormalTok{type\_1\_error\_rate }\OtherTok{\textless{}{-}}\NormalTok{(}\DecValTok{1000}\SpecialCharTok{{-}}\FunctionTok{sum}\NormalTok{(reject\_null))}\SpecialCharTok{/}\DecValTok{1000}
+
+\CommentTok{\# Output the Type I error rate}
+
+\NormalTok{type\_1\_error\_rate}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.957
+\end{verbatim}
+
+Methodology for Scenario A: Simulation under the null hypothesis
+(\(\beta_{1}\) = 0): We simulate the model assuming there is no effect
+of temperature on particulate matter (i.e., \(\beta_{1}\) = 0). Hence,
+the model simplifies to: \begin{align}
+$$Y_{i}= 30 + e_{i} $$
+\end{align}
+
+scenario b
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)  }\CommentTok{\# For reproducibility}
+
+\CommentTok{\# Load data (assuming temperature values are stored in \textquotesingle{}temperature\textquotesingle{} variable)}
+\NormalTok{temperature }\OtherTok{\textless{}{-}}\NormalTok{ data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{temperature}
+
+\NormalTok{n }\OtherTok{\textless{}{-}} \FunctionTok{length}\NormalTok{(temperature)  }\CommentTok{\# Number of observations in temperature data}
 
 
+\NormalTok{reject\_null }\OtherTok{\textless{}{-}} \FunctionTok{numeric}\NormalTok{(n\_simulations)  }\CommentTok{\# To store whether the null hypothesis is rejected}
+
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\NormalTok{n\_simulations) \{}
+  \CommentTok{\# Simulate heteroscedastic errors with mean variance 100 and variance of the variances = 50}
+  \CommentTok{\# Generate different variances for each observation, ensuring mean is 100 and variance is 50}
+\NormalTok{  variances }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(n, }\AttributeTok{mean =} \DecValTok{100}\NormalTok{, }\AttributeTok{sd =} \FunctionTok{sqrt}\NormalTok{(}\DecValTok{50}\NormalTok{))  }\CommentTok{\# Variance of each error term}
+\NormalTok{  e }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(n, }\AttributeTok{mean =} \DecValTok{0}\NormalTok{, }\AttributeTok{sd =} \FunctionTok{sqrt}\NormalTok{(}\FunctionTok{abs}\NormalTok{(variances)))  }\CommentTok{\# Simulated errors with heteroscedasticity}
+  
+  \CommentTok{\# Generate Y values under null hypothesis (beta\_1 = 0)}
+\NormalTok{  Y }\OtherTok{\textless{}{-}} \DecValTok{30} \SpecialCharTok{+}\NormalTok{ e}
+  
+  \CommentTok{\# Fit the model Y \textasciitilde{} temperature}
+\NormalTok{  model }\OtherTok{\textless{}{-}} \FunctionTok{lm}\NormalTok{(Y }\SpecialCharTok{\textasciitilde{}}\NormalTok{ temperature)}
+  
+  \CommentTok{\# Perform hypothesis test for beta\_1 (test if beta\_1 = 0)}
+\NormalTok{  p\_value }\OtherTok{\textless{}{-}} \FunctionTok{summary}\NormalTok{(model)}\SpecialCharTok{$}\NormalTok{coefficients[}\DecValTok{2}\NormalTok{, }\DecValTok{4}\NormalTok{]  }\CommentTok{\# Extract p{-}value for temperature coefficient}
+  
+  \CommentTok{\# Record whether the null hypothesis is rejected (p{-}value \textless{} 0.05)}
+\NormalTok{  reject\_null[i] }\OtherTok{\textless{}{-}} \FunctionTok{as.numeric}\NormalTok{(p\_value }\SpecialCharTok{\textless{}} \FloatTok{0.05}\NormalTok{)}
+\NormalTok{\}}
+
+\CommentTok{\# Calculate the Type I error rate (proportion of rejected null hypotheses)}
+\NormalTok{type\_1\_error\_rate }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1000}\SpecialCharTok{{-}}\FunctionTok{sum}\NormalTok{(reject\_null))}\SpecialCharTok{/}\DecValTok{1000}
+
+\CommentTok{\# Print the Type I error rate}
+\NormalTok{type\_1\_error\_rate}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.953
+\end{verbatim}
+
+scenario C
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)  }\CommentTok{\# For reproducibility}
+
+\CommentTok{\# Load data (assuming temperature values are stored in \textquotesingle{}temperature\textquotesingle{} variable)}
+\NormalTok{temperature }\OtherTok{\textless{}{-}}\NormalTok{ data\_tidy\_air\_quality}\SpecialCharTok{$}\NormalTok{temperature}
+
+\NormalTok{n }\OtherTok{\textless{}{-}} \FunctionTok{length}\NormalTok{(temperature)  }\CommentTok{\# Number of observations in temperature data}
+\NormalTok{n\_sim }\OtherTok{\textless{}{-}} \DecValTok{1000}  \CommentTok{\# Number of simulations}
+
+\CommentTok{\# Function to generate autocorrelated errors}
+\NormalTok{generate\_ar1\_errors }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(n, rho, var\_epsilon) \{}
+\NormalTok{  sigma\_u\_squared }\OtherTok{\textless{}{-}}\NormalTok{ var\_epsilon }\SpecialCharTok{*}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ rho}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}
+\NormalTok{  u }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(n, }\AttributeTok{mean =} \DecValTok{0}\NormalTok{, }\AttributeTok{sd =} \FunctionTok{sqrt}\NormalTok{(sigma\_u\_squared))}
+\NormalTok{  epsilon }\OtherTok{\textless{}{-}} \FunctionTok{numeric}\NormalTok{(n)}
+\NormalTok{  epsilon[}\DecValTok{1}\NormalTok{] }\OtherTok{\textless{}{-}}\NormalTok{ u[}\DecValTok{1}\NormalTok{]}
+  \ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{2}\SpecialCharTok{:}\NormalTok{n) \{}
+\NormalTok{    epsilon[i] }\OtherTok{\textless{}{-}}\NormalTok{ rho }\SpecialCharTok{*}\NormalTok{ epsilon[i }\SpecialCharTok{{-}} \DecValTok{1}\NormalTok{] }\SpecialCharTok{+}\NormalTok{ u[i]}
+\NormalTok{  \}}
+\NormalTok{  epsilon}
+\NormalTok{\}}
+
+\NormalTok{rho }\OtherTok{\textless{}{-}} \FloatTok{0.3}  \CommentTok{\# Autocorrelation coefficient}
+\NormalTok{var\_epsilon }\OtherTok{\textless{}{-}} \DecValTok{100}  \CommentTok{\# Desired variance of errors}
+
+\NormalTok{reject\_null }\OtherTok{\textless{}{-}} \FunctionTok{numeric}\NormalTok{(n\_sim)  }\CommentTok{\# To store whether the null hypothesis is rejected}
+
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\NormalTok{n\_sim) \{}
+  \CommentTok{\# Generate autocorrelated errors with Corr(epsilon\_i, epsilon\_(i+1)) = 0.3}
+\NormalTok{  e }\OtherTok{\textless{}{-}} \FunctionTok{generate\_ar1\_errors}\NormalTok{(n, rho, var\_epsilon)}
+  
+  \CommentTok{\# Generate Y values under null hypothesis (beta\_1 = 0)}
+\NormalTok{  Y }\OtherTok{\textless{}{-}} \DecValTok{30} \SpecialCharTok{+}\NormalTok{ e}
+  
+  \CommentTok{\# Fit the model Y \textasciitilde{} temperature}
+\NormalTok{  model }\OtherTok{\textless{}{-}} \FunctionTok{lm}\NormalTok{(Y }\SpecialCharTok{\textasciitilde{}}\NormalTok{ temperature)}
+  
+  \CommentTok{\# Perform hypothesis test for beta\_1 (test if beta\_1 = 0)}
+\NormalTok{  p\_value }\OtherTok{\textless{}{-}} \FunctionTok{summary}\NormalTok{(model)}\SpecialCharTok{$}\NormalTok{coefficients[}\DecValTok{2}\NormalTok{, }\DecValTok{4}\NormalTok{]  }\CommentTok{\# Extract p{-}value for temperature coefficient}
+  
+  \CommentTok{\# Record whether the null hypothesis is rejected (p{-}value \textless{} 0.05)}
+\NormalTok{  reject\_null[i] }\OtherTok{\textless{}{-}} \FunctionTok{as.numeric}\NormalTok{(p\_value }\SpecialCharTok{\textless{}} \FloatTok{0.05}\NormalTok{)}
+\NormalTok{\}}
+
+\CommentTok{\# Calculate the Type I error rate (proportion of rejected null hypotheses)}
+\NormalTok{type\_1\_error\_rate }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1000}\SpecialCharTok{{-}}\FunctionTok{sum}\NormalTok{(reject\_null))}\SpecialCharTok{/}\DecValTok{1000}
+
+\CommentTok{\# Print the Type I error rate}
+\NormalTok{type\_1\_error\_rate}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.947
+\end{verbatim}
 
 \end{document}
