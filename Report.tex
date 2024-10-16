@@ -102,17 +102,6 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
-% From pandoc table feature
-\usepackage{longtable,booktabs,array}
-\usepackage{calc} % for calculating minipage widths
-% Correct order of tables after \paragraph or \subparagraph
-\usepackage{etoolbox}
-\makeatletter
-\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
-\makeatother
-% Allow footnotes in longtable head/foot
-\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
-\makesavenoteenv{longtable}
 
 
 \usepackage{float} \floatplacement{figure}{H} \usepackage{caption} \captionsetup[figure]{font=scriptsize} \renewenvironment{abstract}{}{} \renewenvironment{keywords}{}{}
@@ -171,11 +160,9 @@
 
 \newpage
 
-\hypertarget{part-one-analysis}{%
-\subsection{Part One : Analysis}\label{part-one-analysis}}
+\subsection{Part One : Analysis}\label{part-one-analysis}
 
-\hypertarget{section-1-introduction}{%
-\section{Section 1: Introduction}\label{section-1-introduction}}
+\section{Section 1: Introduction}\label{section-1-introduction}
 
 Air pollution, particularly high levels of particulate matter (PM), is a
 major environmental and public health issue in South Africa's urban
@@ -201,8 +188,7 @@ levels?\\
 Urban Greenery: How effective are green spaces in reducing air pollution
 in densely populated areas?
 
-\hypertarget{objective}{%
-\section{Objective}\label{objective}}
+\section{Objective}\label{objective}
 
 \hfill\break
 The goal of this analysis is to explore the relationships between PM
@@ -211,9 +197,8 @@ influential factors, we aim to inform urban planning and public health
 strategies that address air pollution and improve the quality of life in
 South African cities.
 
-\hypertarget{section-2-data-exploration}{%
 \subsection{Section 2 : Data
-Exploration}\label{section-2-data-exploration}}
+Exploration}\label{section-2-data-exploration}
 
 density plot
 
@@ -366,8 +351,7 @@ areas often have less vegetation, leading to a relationship that may
 confound the analysis. Additionally, temperature and wind speed may also
 exhibit collinearity, as changes in one could affect the other.
 
-\hypertarget{section-3}{%
-\section{Section 3}\label{section-3}}
+\section{Section 3}\label{section-3}
 
 simple linear regression
 
@@ -506,8 +490,7 @@ hypthesis test
 
 \newpage
 
-\hypertarget{question-4}{%
-\section{Question 4}\label{question-4}}
+\section{Question 4}\label{question-4}
 
 \begingroup\fontsize{12}{14}\selectfont
 
@@ -551,19 +534,17 @@ hypthesis test
 \end{longtable}
 \endgroup{}
 
-\hypertarget{hypothesis-testing}{%
-\subsubsection{Hypothesis Testing}\label{hypothesis-testing}}
+\subsubsection{Hypothesis Testing}\label{hypothesis-testing}
 
 We'd like to perform hypothesis tests on the following variables:
 Temperature, Humidity, Industrial Levels, and Day of Week.
 
 We'll start by examining whether Temperature has an effect on the
-concentration of Particulate Matter. We'll use the following We use the
-following set of hypothesis: \begin{align}
-\[&H_0: \beta_{temp} = \beta_{hum:temp} = 0 \\ 
-&H_A: \beta_{temp} \neq 0 \text{ and } \beta_{hum:temp} \neq 0\]
-\end{align} This can be done by comparing the restricted and un
-restricted model: \[Y_R = \beta_0 + \beta_{traffic}X + \]
+concentration of \[
+H_0: \beta_{temp} = \beta_{hum:temp} = 0 \ 
+H_A: \beta_{temp} \neq 0 \text{ and } \beta_{hum:temp} \neq 0
+\] This can be done by comparing the restricted and un restricted model:
+\[Y_R = \beta_0 + \beta_{traffic}X + \]
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -573,24 +554,101 @@ restricted model: \[Y_R = \beta_0 + \beta_{traffic}X + \]
 \NormalTok{model\_restricted }\OtherTok{\textless{}{-}} \FunctionTok{update}\NormalTok{(model\_unrestricted, .}\SpecialCharTok{\textasciitilde{}}\NormalTok{.}
                            \SpecialCharTok{{-}}\NormalTok{ temperature}
                            \SpecialCharTok{{-}}\NormalTok{ temperature}\SpecialCharTok{:}\NormalTok{humidity)}
-\FunctionTok{kable}\NormalTok{(}\FunctionTok{anova}\NormalTok{(model\_unrestricted, model\_restricted))}
+\FunctionTok{anova}\NormalTok{(model\_unrestricted, model\_restricted)}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{longtable}[]{@{}rrrrrr@{}}
-\toprule\noalign{}
-Res.Df & RSS & Df & Sum of Sq & F & Pr(\textgreater F) \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-133 & 11032.02 & NA & NA & NA & NA \\
-135 & 11095.83 & -2 & -63.80113 & 0.3845872 & 0.6814861 \\
-\end{longtable}
+\begin{verbatim}
+## Analysis of Variance Table
+## 
+## Model 1: particulate_matter ~ traffic_density + industrial_activity + 
+##     temperature + humidity + wind_speed + day_of_week + holiday + 
+##     urban_greenery + temperature:humidity
+## Model 2: particulate_matter ~ traffic_density + industrial_activity + 
+##     humidity + wind_speed + day_of_week + holiday + urban_greenery
+##   Res.Df   RSS Df Sum of Sq      F Pr(>F)
+## 1    133 11032                           
+## 2    135 11096 -2   -63.801 0.3846 0.6815
+\end{verbatim}
 
 Using the anova function in R, we compare the two models with F test,
 yielding a P value 0.6815, suggesting that temperature doesn't have a
 significant effect on the concentration of particular matter.
+
+We now test for \[
+\begin{aligned}
+&H_0: \beta_{hum} = \beta_{hum:temp} = 0 \\
+&H_A: \beta_{hum} \neq 0 \text{ and } \beta_{hum:temp} \neq 0
+\end{aligned}
+\]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model\_unrestricted }\OtherTok{\textless{}{-}} \FunctionTok{lm}\NormalTok{(particulate\_matter }\SpecialCharTok{\textasciitilde{}}\NormalTok{ . }\SpecialCharTok{+} 
+\NormalTok{                         temperature}\SpecialCharTok{:}\NormalTok{humidity,}
+                         \AttributeTok{data=}\NormalTok{data\_tidy\_air\_quality)}
+\NormalTok{model\_restricted }\OtherTok{\textless{}{-}} \FunctionTok{update}\NormalTok{(model\_unrestricted, .}\SpecialCharTok{\textasciitilde{}}\NormalTok{.}
+                           \SpecialCharTok{{-}}\NormalTok{ humidity}
+                           \SpecialCharTok{{-}}\NormalTok{ temperature}\SpecialCharTok{:}\NormalTok{humidity)}
+\FunctionTok{anova}\NormalTok{(model\_unrestricted, model\_restricted)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Analysis of Variance Table
+## 
+## Model 1: particulate_matter ~ traffic_density + industrial_activity + 
+##     temperature + humidity + wind_speed + day_of_week + holiday + 
+##     urban_greenery + temperature:humidity
+## Model 2: particulate_matter ~ traffic_density + industrial_activity + 
+##     temperature + wind_speed + day_of_week + holiday + urban_greenery
+##   Res.Df   RSS Df Sum of Sq      F    Pr(>F)    
+## 1    133 11032                                  
+## 2    135 16101 -2   -5069.2 30.556 1.204e-11 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+Repeating the same procedure, we obtain a P value less than 0.00001,
+indicating that humidity has a significant effect on the concentration
+of particular matter
+
+\subsubsection{Categorical Variables}\label{categorical-variables}
+
+For the categorical levels with more than 2 levels, we can read directly
+from the summary table that only Moderate Industrial Activity yields a P
+value less than 0.05 (P value = 0.0308). We can thus only reject the
+null hypothesis at 0.05 \(\alpha\) level.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{summary\_df }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{summary}\NormalTok{(multi\_model)}\SpecialCharTok{$}\NormalTok{coefficients)}
+\NormalTok{summary\_categorical\_df }\OtherTok{\textless{}{-}}\NormalTok{ summary\_df[}\FunctionTok{c}\NormalTok{(}\DecValTok{3}\SpecialCharTok{:}\DecValTok{5}\NormalTok{, }\DecValTok{9}\SpecialCharTok{:}\DecValTok{14}\NormalTok{),]}
+\NormalTok{summary\_table }\OtherTok{\textless{}{-}} \FunctionTok{kable}\NormalTok{(summary\_categorical\_df, }\AttributeTok{digits=}\DecValTok{4}\NormalTok{)}\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{kable\_styling}\NormalTok{(}\AttributeTok{font\_size =} \DecValTok{12}\NormalTok{)}
+\NormalTok{summary\_table}
+\end{Highlighting}
+\end{Shaded}
+
+\begingroup\fontsize{12}{14}\selectfont
+
+\begin{longtable}[t]{lrrrr}
+\toprule
+ & Estimate & Std. Error & t value & Pr(>\&\#124;t\&\#124;)\\
+\midrule
+industrial\_activityLow & 2.6589 & 2.9480 & 0.9019 & 0.3687\\
+industrial\_activityModerate & 6.4545 & 2.9575 & 2.1824 & 0.0308\\
+industrial\_activityHigh & 5.3652 & 2.8390 & 1.8898 & 0.0610\\
+day\_of\_weekTuesday & 0.0133 & 3.0339 & 0.0044 & 0.9965\\
+day\_of\_weekWednesday & 0.1565 & 2.7840 & 0.0562 & 0.9553\\
+\addlinespace
+day\_of\_weekThursday & 0.1662 & 2.8832 & 0.0576 & 0.9541\\
+day\_of\_weekFriday & -2.4221 & 2.8505 & -0.8497 & 0.3970\\
+day\_of\_weekSaturday & -4.4832 & 3.9825 & -1.1257 & 0.2623\\
+day\_of\_weekSunday & -2.0885 & 4.1094 & -0.5082 & 0.6121\\
+\bottomrule
+\end{longtable}
+\endgroup{}
 
 
 

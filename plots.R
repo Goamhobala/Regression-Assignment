@@ -23,7 +23,10 @@ ggplot(data_tidy_air_quality, aes(x=particulate_matter))+
 
 
 # Question4
+
+data_tidy_air_quality$industrial_activity <- relevel(factor(data_tidy_air_quality$industrial_activity), ref="None") 
 multi_model <- lm(particulate_matter ~ . + temperature:humidity, data=data_tidy_air_quality)
+
 estimates <- as.data.frame(summary(multi_model)$coefficients)
 confint_df <- as.data.frame(confint(multi_model))
 confint_df$Estimate <- as.numeric(estimates$Estimate)
@@ -36,5 +39,12 @@ confint_table <- kable(confint_df_reordered, digits = 4, align="c") |>
   pack_rows(index= c("Intercept"=1, "Traffic Density"=1, "Industrial Activity"=3, "Natural Factors" = 4, "Day of Week"=6, "Holiday"=1, "Urban Greenery"=1))
 
 
+summary_df <- as.data.frame(summary(multi_model)$coefficients)
+summary_categorical_df <- summary_df[c(3:5, 9:14),]
+summary_table <- kable(summary_categorical_df, digits=4)|>
+  kable_styling(font_size = 12)
+
 model_restricted <- update(multi_model, .~. - temperature - temperature:humidity)
  
+
+model <- lm(particulate_matter ~ industrial_activityLow + industrial_activityModerate + industrial_activityHigh, data=data_tidy_air_quality)

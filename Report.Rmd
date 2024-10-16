@@ -267,11 +267,11 @@ confint_table
 ### Hypothesis Testing
 We'd like to perform hypothesis tests on the following variables: Temperature, Humidity, Industrial Levels, and Day of Week.
 
-We'll start by examining whether Temperature has an effect on the concentration of Particulate Matter. We'll use the following We use the following set of hypothesis:
-\begin{align}
-\[&H_0: \beta_{temp} = \beta_{hum:temp} = 0 \\ 
-&H_A: \beta_{temp} \neq 0 \text{ and } \beta_{hum:temp} \neq 0\]
-\end{align}
+We'll start by examining whether Temperature has an effect on the concentration of 
+\[
+H_0: \beta_{temp} = \beta_{hum:temp} = 0 \ 
+H_A: \beta_{temp} \neq 0 \text{ and } \beta_{hum:temp} \neq 0
+\]
 This can be done by comparing the restricted and un restricted model:
 \[Y_R = \beta_0 + \beta_{traffic}X + \]
 
@@ -283,12 +283,46 @@ model_unrestricted <- lm(particulate_matter ~ . +
 model_restricted <- update(model_unrestricted, .~.
                            - temperature
                            - temperature:humidity)
-anova(model_unrestricted, model_restricted)
+anova(model_restricted, model_unrestricted)
  
 
 ```
 Using the anova function in R, we compare the two models with F test, yielding a P value 0.6815, suggesting that temperature doesn't have a significant effect on the concentration of particular matter.
 
+We now test for 
+\[
+\begin{aligned}
+&H_0: \beta_{hum} = \beta_{hum:temp} = 0 \\
+&H_A: \beta_{hum} \neq 0 \text{ and } \beta_{hum:temp} \neq 0
+\end{aligned}
+\]
 
 
+```{r}
+model_unrestricted <- lm(particulate_matter ~ . + 
+                         temperature:humidity,
+                         data=data_tidy_air_quality)
+model_restricted <- update(model_unrestricted, .~.
+                           - humidity
+                           - temperature:humidity)
+anova(model_restricted, model_unrestricted, )
+ 
+```
+Repeating the same procedure, we obtain a P value less than  0.00001, indicating that humidity has a significant effect on the concentration of particular matter
 
+### Categorical Variables
+
+For the categorical levels with more than 2 levels, we can read directly from the summary table that only Moderate Industrial Activity yields a P value less than 0.05 (P value = 0.0308). We can thus only reject the null hypothesis at 0.05 $\alpha$ level.
+
+```{r}
+summary_df <- as.data.frame(summary(multi_model)$coefficients)
+summary_categorical_df <- summary_df[c(3:5, 9:14),]
+summary_table <- kable(summary_categorical_df, digits=4, align="c")|>
+  kable_styling(font_size = 12)
+summary_table
+```
+### Intepretation
+From the summary output and the F test for Natural Factors, we get that only Moderate Industrial Activity (p-value: ), Traffic Density, Urban Greenery, and Humidity have a significant effect (p value less than or equal to 0.05) on the particulate levels.
+
+The average increase in concentration of particulate matter by Moderate Industrial Activity is estimated to be 6.4545 $\frac{\mu g}{m^3}$(CI95%: 0.6047, 12.3043), indicating a significant positive association between the two factors. The average increase in concentration of particulate matter caused by Traffic Density, that is one extra vehicle per hour, is estimated to be 0.0799 \frac{\mu g}{m^3}$ (CI95%: 0.0155, 0.1444), indicating a positive association. The average decrease in concentration of particulate matter caused by a unit increase in Urban Greenery is estimated to be 
+0.2954 $\frac{\mu g}{m^3}$ (CI95%:-0.4142, -0.1766), indicating a negative association between the two, The effect of humidity can interact with temperature, and is thus not independent. Using the anova model, we can only deduce that there is likely an effect, but we can't be certain about the confidence interval.
