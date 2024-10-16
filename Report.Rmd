@@ -320,18 +320,18 @@ for (i in 1:n_simulations) {
   # Generate error term e ~ Uniform(a, b)
   e <- runif(length(temperature), min = a, max = b)
   
-  # Generate Y = 30 + e (since β1 = 0)
+  # Generate Y = 30 + e (since b1 = 0)
   Y <- 30 + e
   
   
-  # Fit the linear model Y = β0 + β1 * temperature
+  # Fit the linear model Y = b0 + b1 * temperature
   model <- lm(Y ~ temperature)
   
-  # Perform hypothesis test on β1 (null hypothesis: β1 = 0) and extract from lm
+  # Perform hypothesis test on b1 (null hypothesis: b1 = 0) and extract from lm
   p_value <- summary(model)$coefficients[2, 4]
   p_value
   
-  # Record if the null hypothesis is rejected (α = 0.05)
+  # Record if the null hypothesis is rejected (a = 0.05)
   reject_null[i] <- ifelse(p_value < 0.05, 1, 0)
 
   }
@@ -343,16 +343,6 @@ type_1_error_rate <-(1000-sum(reject_null))/1000
 
 type_1_error_rate
 ```
-Methodology for Scenario A:
-Simulation under the null hypothesis ($\beta_{1}$ = 0):
-We simulate the model assuming there is no effect of temperature on particulate matter (i.e., $\beta_{1}$ = 0). Hence, the model simplifies to:
-\begin{align}
-$$Y_{i}= 30 + e_{i} $$
-\end{align}
-
-
-
-
 
 
 scenario b
