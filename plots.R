@@ -44,7 +44,54 @@ summary_categorical_df <- summary_df[c(3:5, 9:14),]
 summary_table <- kable(summary_categorical_df, digits=4)|>
   kable_styling(font_size = 12)
 
-model_restricted <- update(multi_model, .~. - temperature - temperature:humidity)
- 
+set.seed(123)
 
-model <- lm(particulate_matter ~ industrial_activityLow + industrial_activityModerate + industrial_activityHigh, data=data_tidy_air_quality)
+# Number of simulations
+n_simulations <- 1000
+
+temperature <- data_tidy_air_quality$temperature
+
+# Initialize a vector to store whether the null hypothesis was rejected in each simulation
+reject_null <- numeric(n_simulations)
+
+
+# Variance of the uniform distribution needs to be 100, so we calculated b = 17.32
+a <- -17.32
+b <- 17.32
+
+# Run simulations
+type_1_error_counter <- 0
+for (i in 1:n_simulations) {
+  
+  # Generate error term e ~ Uniform(a, b)
+  e <- runif(length(temperature), min = a, max = b)
+  e_pois <- rpois(length(temperature), var(temperature))
+  e_norm <- rnorm(length(temperature),0, var(temperature))
+  # Generate Y = 30 + e (since b1 = 0)
+  Y <- 30 + e_pois
+  
+  
+  # Fit the linear model Y = b0 + b1 * temperature
+  model <- lm(Y ~ temperature)
+  
+  # Perform hypothesis test on b1 (null hypothesis: b1 = 0) and extract from lm
+  p_value <- summary(model)$coefficients[2, 4]
+  p_value
+  
+  if (p_value < 0.05) {
+    type_1_error_counter <- 1 + type_1_error_counter
+  }
+  
+}
+
+# Calculate Type I error rate (proportion of times the null was incorrectly rejected)
+type_1_error_rate <-(type_1_error_counter)/1000
+
+# Output the Type I error rate
+
+type_1_error_rate
+
+
+
+
+

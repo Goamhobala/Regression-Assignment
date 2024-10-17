@@ -7,6 +7,12 @@ author:
     email: yhxjin001@myuct.ac.za
   - name: Saurav Sathnarayan
     email: sthsau001@myuct.ac.za
+nocite: '@*'
+
+abstract: In this report, we explored the efficiency of 6 programming languages through the approximation of $\pi$. We found that efficiency of various programming languages can vary widely, with C and C++ being the most efficient programming languages. We also presented evidence for compiled languages having better performance than interpreted languages. Our results suggest that programmers can benefit from taking the efficiency of various programming languages into account, rather than simply opting for simplicity in the syntax of these languages .
+  
+keywords: Programming Languages, Efficieny, Large-Scaled Iterative Compuations 
+  
 #bibliography: mybibfile.bib
 #nocite: '@*'
   
@@ -260,40 +266,100 @@ confint_table <- kable(confint_df_reordered, digits = 4, align="c", caption="Con
 confint_table
 ```
 
-### Hypothesis Testing
+## Hypothesis Testing
 We'd like to perform hypothesis tests on the following variables: Temperature, Humidity, Industrial Levels, and Day of Week.
 
 We'll start by examining whether Temperature has an effect on the concentration of Particulate Matter. We'll use the following We use the following set of hypothesis:
-```{r}
-#\begin{align}
-#$$H_0: \beta_{temp} = \beta_{hum:temp} = 0$$ 
-#$$H_A: \beta_{temp} \neq 0 \text{ and } \beta_{hum:temp} \neq 0$$
-#\end{align}
-#\
-#This can be done by comparing the restricted and un restricted model:
-#$$Y_R = \beta_0 + \beta_{traffic}X + $$
-```
 
 
+\[
+\begin{aligned}
+&H_0: \beta_{temp} = \beta_{hum:temp} = 0 \\
+&H_A: \beta_{temp} \neq 0 \text{ and } \beta_{hum:temp} \neq 0
+\end{aligned}\]
 
-
-```{r}
+\
+This can be done by comparing the restricted and un restricted model:
+$$Y_R = \beta_0 + \beta_{traffic}X + $$
+```{r, eval=FALSE}
 model_unrestricted <- lm(particulate_matter ~ . + 
                          temperature:humidity,
                          data=data_tidy_air_quality)
 model_restricted <- update(model_unrestricted, .~.
                            - temperature
                            - temperature:humidity)
-anova(model_unrestricted, model_restricted)
+anova(model_restricted, model_restricted)
  
-
 ```
-Using the anova function in R, we compare the two models with F test, yielding a P value 0.6815, suggesting that temperature doesn't have a significant effect on the concentration of particular matter.
+Using the anova function in R, we compare the two models with F test. The F test yields a P value 0.6815, suggesting that temperature doesn't have a significant effect on the concentration of particular matter.
+
+We now test for the effect of humidity. Repeating the same procedure, we obtain a P value < 0.00001. Suggesting that it's likely that humidity has an effect on the concentration of particulate matters.
+\[
+\begin{aligned}
+&H_0: \beta_{hum} = \beta_{hum:temp} = 0 \\
+&H_A: \beta_{hum} \neq 0 \text{ and } \beta_{hum:temp} \neq 0
+\end{aligned}
+\]
 
 
+```{r, eval=FALSE}
+model_unrestricted <- lm(particulate_matter ~ . + 
+                         temperature:humidity,
+                         data=data_tidy_air_quality)
+model_restricted <- update(model_unrestricted, .~.
+                           - humidity
+                           - temperature:humidity)
+anova(model_restricted, model_unrestricted)
+```
+
+
+### Categorical Variables
+For the day of week, we take Monday as the reference category and test for the following set of hypothesis, using the same procedure.
+\[
+\begin{aligned}
+&H_0: \beta_{Tuesday} = \beta_{Wednesday} = \beta_{Thursday} = \beta_{Friday} = \beta_{Saturday} = \beta_{Sunday} = 0 \\
+&H_A: \beta_{Tuesday} \neq 0 \text{ and } \beta_{Wednesday} \neq 0 \text{ and } \beta_{Thursday} \neq 0 \text{ and } \beta_{Friday} \neq 0 \text{ and } \beta_{Saturday} \neq 0 \text{ and } \beta_{Sunday} \neq 0
+\end{aligned}
+\]
+```{r, eval=FALSE}
+data_tidy_air_quality$day_of_week <- 
+  relevel(factor(data_tidy_air_quality$day_of_week), ref="Monday")
+model_unrestricted <- lm(particulate_matter ~ .,
+                         data=data_tidy_air_quality)
+model_restricted <- update(model_unrestricted, .~.
+                           - day_of_week)
+anova(model_restricted, model_unrestricted)
+```
+The P value is 0.7735, indicating that there is no evidence that supports rejecting the null hypothesis.
+
+We do the same for industrial activity, taking No Activity as the reference category to test for the set of hypothesis:
+\[
+\begin{aligned}
+&H_0: \beta_{Low} = \beta_{Moderate} = \beta_{High} = 0 \\
+&H_A: \beta_{Low} \neq 0 \text{ and } \beta_{Moderate} \neq 0 \text{ and } \beta_{High} \neq 0 
+\end{aligned}
+\]
+```{r, eval=FALSE}
+data_tidy_air_quality$industrial_activity <-
+  relevel(factor(data_tidy_air_quality$industrial_activity), ref="None")
+model_unrestricted <- lm(particulate_matter ~ .,
+                         data_tidy_air_quality)
+model_restricted <- lm(particulate_matter ~ . - industrial_activity,
+                       data_tidy_air_quality)
+anova(model_restricted, model_unrestricted)
+```
+We obtain a P-value of 0.0707, suggesting that there's no evidence that supports rejecting the null hypothesis at 5% significance level.
+
+## Intepretation
+From the summary output and the F test for Natural Factors, we get that only Moderate Industrial Activity (p-value: 0.03), Traffic Density (p-value: 0.0155), Urban Greenery (p-value: < 0.0001), and Humidity (p-value: < 0.0001) have a significant effect (p value less than or equal to 0.05) on the concentration of particulate matters.
+
+The average increase in concentration of particulate matter by Moderate Industrial Activity is estimated to be 6.4545 $\frac{\mu g}{m^3}$(CI95%: 0.6047, 12.3043), indicating a significant positive association between the two factors. The average increase in concentration of particulate matter caused by Traffic Density, that is one extra vehicle per hour, is estimated to be 0.0799 $\frac{\mu g}{m^3}$ (CI95%: 0.0155, 0.1444), indicating a positive association. The average decrease in concentration of particulate matter caused by a unit in the percentage of area covered by Urban Greenery is estimated to be 0.2954 $\frac{\mu g}{m^3}$ (CI95%:-0.4142, -0.1766), indicating a negative association between the two. The effect of humidity can interact with temperature, and is thus not independent of other factors. Using the anova model, we can only deduce that there is likely an effect, but we can't be certain about the confidence interval.
 
 # part 2
-scenario A
+## Scenario A
+
+### Methodology
+Under the null hypothesis, the response variable is not related to temperature. We have that $\beta_0 = 0$, which means that the response variable $Y = 30 + \epsilon$ where $\epsilon$ is some random noises. We violated the model assumption by making $\epsilon \sim Unif(-17.32, 17.32)$ where $Var(\epsilon) = 100$, as opposed to being normally distributed.
 
 ```{r}
 library(tidyverse)
@@ -307,8 +373,9 @@ n_simulations <- 1000
 temperature <- data_tidy_air_quality$temperature
 
 # Initialize a vector to store whether the null hypothesis was rejected in each simulation
-reject_null <- numeric(n_simulations)
+#reject_null <- numeric(n_simulations)
 
+reject_counter <- 0
 
 # Variance of the uniform distribution needs to be 100, so we calculated b = 17.32
 a <- -17.32
@@ -319,6 +386,7 @@ for (i in 1:n_simulations) {
   
   # Generate error term e ~ Uniform(a, b)
   e <- runif(length(temperature), min = a, max = b)
+  e_norm <- rnorm(length(temperature), 0, var(temperature))
   
   # Generate Y = 30 + e (since b1 = 0)
   Y <- 30 + e
@@ -332,18 +400,23 @@ for (i in 1:n_simulations) {
   p_value
   
   # Record if the null hypothesis is rejected (a = 0.05)
-  reject_null[i] <- ifelse(p_value < 0.05, 1, 0)
+  #reject_null[i] <- ifelse(p_value < 0.05, 1, 0)
+  if (p_value < 0.05){
+    reject_counter <- reject_counter + 1
+  }
 
   }
 
 # Calculate Type I error rate (proportion of times the null was incorrectly rejected)
-type_1_error_rate <-(1000-sum(reject_null))/1000
+#type_1_error_rate <-(1000-sum(reject_null))/1000
+type_1_error_rate <- (reject_counter)/1000
 
 # Output the Type I error rate
 
 type_1_error_rate
 ```
-
+### Results
+We obtain a type 1 error rate of 0.054, which is not too far from 0.05. Indicating that this model assumption does not significantly affect the type 1 error rate. This can be explained by central limit theorem, with the sampling distribution of e converges to a normal distribution. (For interest's sake, if we change the simulation count to 10000, the type 1 error rate becomes 0.0501, even closer to 0.05)
 
 scenario b
 ```{r}
