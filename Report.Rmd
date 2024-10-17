@@ -211,11 +211,11 @@ overall_mean <- mean(data_tidy_air_quality$particulate_matter)
 # Calculate SST
 SST <- sum((data_tidy_air_quality$particulate_matter - overall_mean)^2)
 
-# Calculate SSB
+# Calculate SStreatment
 n <- table(data_tidy_air_quality$industrial_activity)
 SStreatment <- sum(n * (group_means - overall_mean)^2)
 
-# Calculate SSW
+# Calculate SSerror
 group_means_vector <- unlist(tapply(data_tidy_air_quality$particulate_matter, data_tidy_air_quality$industrial_activity, mean)[data_tidy_air_quality$industrial_activity])
 SSerror <- sum((data_tidy_air_quality$particulate_matter - group_means_vector)^2)
 
@@ -290,12 +290,27 @@ anova(model_unrestricted, model_restricted)
 ```
 Using the anova function in R, we compare the two models with F test, yielding a P value 0.6815, suggesting that temperature doesn't have a significant effect on the concentration of particular matter.
 
-
-
 # part 2
-scenario A
+# Scenario A:
 
-```{r}
+## Methodology and discussion of results for Scenario A
+Simulation under the null hypothesis ($\beta_{1}$= 0):
+
+We simulate the data assuming $\beta_{0}$ = 30, $\beta_{1}$= 0, and errors are uniformly distributed.
+The errors will be sampled from a uniform distribution where $e \sim U(a,b)$ with the constraint that $Var(e)$ = 100
+
+For a uniform distribution $e \sim U(a,b)$ with a variance $\sigma^2$ = 100, $Var(e) = \frac{(b-a)^2}{12}$. Solving for $a$ and $b$ we get $a = -17.32$ and $b= 17.32$
+
+To simulate our data, we ran a loop 1000 times, and in each simulation, we used runif(length(temperature), min = a, max = b) function in R to generate random errors. Next calculated $Y_{i}=30 + e$. We then used the lm function to fit our regression model. We extacted p values from our model, and ran ifelse statement to check whether our null hypothesis was rejected or not. Finally, we counted the number of null hypothesises rejected and we observed that our type 1 error rate for this scenario is 0.043
+
+Type I error is the probability of incorrectly rejecting the null hypothesis when it is true (false positive). Under the null hypothesis, the expected Type I error rate should be equal to the chosen significance level, typically 0.05.
+
+Under a uniform distribution, the error terms tend to be more tightly spread compared to the tails of a normal distribution (which has more extreme values due to its longer tails). This can result in:
+
+Underestimated variability in the model, leading to more frequent rejections of the null hypothesis when it should not be rejected.
+Inflated Type I error rate: The test may incorrectly reject the null hypothesis more often than expected under the nominal significance level.
+
+```{r include=FALSE}
 library(tidyverse)
 
 # Set the seed for reproducibility
@@ -329,7 +344,6 @@ for (i in 1:n_simulations) {
   
   # Perform hypothesis test on b1 (null hypothesis: b1 = 0) and extract from lm
   p_value <- summary(model)$coefficients[2, 4]
-  p_value
   
   # Record if the null hypothesis is rejected (a = 0.05)
   reject_null[i] <- ifelse(p_value < 0.05, 1, 0)
@@ -337,31 +351,39 @@ for (i in 1:n_simulations) {
   }
 
 # Calculate Type I error rate (proportion of times the null was incorrectly rejected)
-type_1_error_rate <-(1000-sum(reject_null))/1000
+type_1_error_rate <-mean(reject_null)
 
 # Output the Type I error rate
 
 type_1_error_rate
 ```
 
+# Scenario B:
 
-scenario b
-```{r}
-set.seed(123)  # For reproducibility
+## Methodology and discussion of results for Scenario B
+Again we run a loop of 1000 simulations. In each simulation, We simulate the error variances using the normal distribution with mean of 100 and variance of 50. We then ensure that the variances are positive by taking the absolute value of the simulated variances. Then we simulated error terms using a normal distribution with a mean of 0 and a variance  of our error_variance calculated before. This ensures that our errors have a non constant variance. We then repeated the same steps as above to obtain our type 1 error rate. Our observated type 1 error rate is 0.047.
 
-# Load data (assuming temperature values are stored in 'temperature' variable)
-temperature <- data_tidy_air_quality$temperature
+Impact of Heteroscedasticity:
+Effect on Type I Error Rate: Heteroscedasticity violates the assumption of constant variance in regression models. This leads to incorrect estimates of standard errors and, consequently, incorrect p-values. As a result, the Type I error rate will likely increase beyond the nominal 0.05 level.
 
+Our error rate is lower than 0,05. There could be a few reasons for this:
+
+Conservative Hypothesis Test: Our test may be too conservative. This means the test is less likely to reject the null hypothesis even when it might be warranted. It could happen if:
+The variability of the errors isn't large enough to make the standard errors inaccurate in a way that increases the Type I error.
+
+The model has adjusted in such a way that it becomes harder to reject the null hypothesis, potentially overcorrecting for the heteroscedasticity.
+```{r include=FALSE}
+# For reproducibility
+set.seed(123)
 n <- length(temperature)  # Number of observations in temperature data
-
 
 reject_null <- numeric(n_simulations)  # To store whether the null hypothesis is rejected
 
 for (i in 1:n_simulations) {
   # Simulate heteroscedastic errors with mean variance 100 and variance of the variances = 50
   # Generate different variances for each observation, ensuring mean is 100 and variance is 50
-  variances <- rnorm(n, mean = 100, sd = sqrt(50))  # Variance of each error term
-  e <- rnorm(n, mean = 0, sd = sqrt(abs(variances)))  # Simulated errors with heteroscedasticity
+  error_variances <- rnorm(n, mean = 100, sd = sqrt(50))  # Variance of each error term
+  e <- rnorm(n, mean = 0, sd = sqrt(error_variances))  # Simulated errors with heteroscedasticity
   
   # Generate Y values under null hypothesis (beta_1 = 0)
   Y <- 30 + e
@@ -377,20 +399,32 @@ for (i in 1:n_simulations) {
 }
 
 # Calculate the Type I error rate (proportion of rejected null hypotheses)
-type_1_error_rate <- (1000-sum(reject_null))/1000
+type_1_error_rate <- mean(reject_null)
 
 # Print the Type I error rate
 type_1_error_rate
+error_variances
 ```
-scenario C
-```{r}
-set.seed(123)  # For reproducibility
 
-# Load data (assuming temperature values are stored in 'temperature' variable)
+
+# Scenario C:
+
+## Methodology and discussion of results for Scenario C:
+Using our loop again, we run 1000 simulations,but this time we test the dependence of errors in our model. To generate Correlated errrors in our model we, use the provided function given to us. As above we repeated the same steps in order to obtain the proportion of the number of times our null hypothesis  was incorrectly rejected. OUr type 1 errot rate was 0.053.
+
+Autocorrelation violates the assumption of independent errors in linear regression. This can lead to incorrect standard errors for the regression coefficients, making hypothesis tests less reliable.
+
+Typically, autocorrelated errors inflate Type I errors if unaccounted for because the model underestimates the true error variability. However, depending on the specific pattern of autocorrelation and sample size, this effect can vary.
+```{r include=FALSE}
+set.seed(123)  
+
 temperature <- data_tidy_air_quality$temperature
 
 n <- length(temperature)  # Number of observations in temperature data
 n_sim <- 1000  # Number of simulations
+
+rho <- 0.3  # Autocorrelation coefficient
+var_epsilon <- 100  # Desired variance of errors
 
 # Function to generate autocorrelated errors
 generate_ar1_errors <- function(n, rho, var_epsilon) {
@@ -403,9 +437,6 @@ generate_ar1_errors <- function(n, rho, var_epsilon) {
   }
   epsilon
 }
-
-rho <- 0.3  # Autocorrelation coefficient
-var_epsilon <- 100  # Desired variance of errors
 
 reject_null <- numeric(n_sim)  # To store whether the null hypothesis is rejected
 
@@ -427,7 +458,7 @@ for (i in 1:n_sim) {
 }
 
 # Calculate the Type I error rate (proportion of rejected null hypotheses)
-type_1_error_rate <- (1000-sum(reject_null))/1000
+type_1_error_rate <- mean(reject_null)
 
 # Print the Type I error rate
 type_1_error_rate
