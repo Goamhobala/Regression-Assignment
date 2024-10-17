@@ -49,56 +49,61 @@ install.packages("remotes")
 }
 remotes::install_github("MiguelRodo/DataTidyRodoSTA2005S")
 data("data_tidy_air_quality", package = "DataTidyRodoSTA2005S")
-head(data_tidy_air_quality)
 
 library(ggplot2)
 library(tidyr)
 library(kableExtra)
 ```
 
-## Part One : Analysis
+# Part One : Analysis
 
-# Section 1: Introduction
+## Section 1: Introduction
 
 Air pollution, particularly high levels of particulate matter (PM), is a major environmental and public health issue in South Africa’s urban centers. Exposure to elevated PM levels is linked to respiratory diseases and other serious health conditions. Understanding the factors influencing PM concentrations is crucial for developing policies that improve air quality and protect public health. This analysis seeks to identify the key drivers of air pollution in South Africa's cities, focusing on how various urban, environmental, and socioeconomic factors affect particulate matter levels.
-\
+
 Unknown Factors to Investigate:
-\
+
 Traffic Density: How do varying levels of vehicle traffic contribute to PM levels in different areas?
-\
+
 Industrial Activity: What is the impact of industrial activity near monitoring stations on air quality?
-\
+
 Temperature & Humidity: How do changes in weather conditions, like temperature and humidity, influence PM concentrations?
-\
+
 Wind Speed: How does wind speed affect the dispersion or accumulation of particulate matter in urban areas?
-\
+
 Day of the Week & Public Holidays: Do patterns of human activity on weekdays, weekends, and holidays significantly influence pollution levels?
-\
+
 Urban Greenery: How effective are green spaces in reducing air pollution in densely populated areas?
 
 # Objective
-\
-The goal of this analysis is to explore the relationships between PM levels and these explanatory variables. By identifying the most influential factors, we aim to inform urban planning and public health strategies that address air pollution and improve the quality of life in South African cities.
 
+The goal of this analysis is to explore the relationships between PM levels and these explanatory variables. By identifying the most influential factors, we aim to inform urban planning and public health strategies that address air pollution and improve the quality of life in South African cities.
 
 
 ## Section 2 : Data Exploration
 
-density plot
+### Density plot
 
-```{r pressure, echo=FALSE}
+```{r pressure, echo=FALSE, warning=FALSE}
+mean_particle <- mean(data_tidy_air_quality$particulate_matter)
+sd_particle <- sd(data_tidy_air_quality$particulate_matter)
+
+ggplot(data_tidy_air_quality, aes(x=particulate_matter))+
+  geom_histogram(fill="deepskyblue3", color="black", binwidth = 3, aes(y=..density..))+
+  stat_function(fun=dnorm, args=list(mean=mean_particle, sd=sd_particle), color="firebrick4", size=1.2)+
+  labs(title="Density Plot of Particulate Matter", y="Density", x="Particulate Matter")
 ```
 
-pairwsie plots
+### Pairwsie Plots
 
-```{r}
+```{r echo=FALSE, warning=FALSE}
 continuous_vars <- data_tidy_air_quality[, sapply(data_tidy_air_quality, is.numeric)]
-pairs(continuous_vars, main = "Pairwise Scatterplots of Continuous Variables")
+pairs(continuous_vars, main = "Pairwise Scatterplots of Continuous Variables",)
 ```
 
-categorial variable plots
+### Categorial Variable Plots
 
-```{r}
+```{r echo=FALSE, warning=FALSE}
 data_tidy_air_quality$industrial_activity <- factor(data_tidy_air_quality$industrial_activity, 
                                    levels = c("None","Low", "Moderate", "High"))  # Adjust the levels according to your data
 
@@ -124,18 +129,9 @@ for (var in categorical_vars) {
   print(plt)  # Print the plot
 }
 ```
-tabular representation of relationship between categorial variables
-```{r}
-for (i in 1:(length(categorical_vars)-1)) {
-  for (j in (i+1):length(categorical_vars)) {
-    cat("Contingency Table for", categorical_vars[i], "and", categorical_vars[j], "\n")
-    print(table(data_tidy_air_quality[[categorical_vars[i]]], data_tidy_air_quality[[categorical_vars[j]]]))
-    cat("\n")
-  }
-}
-```
-visual representation of relationship between categorial variables
-```{r}
+
+### Visual Representation of Relationship between Categorial Variables
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 for (i in 1:(length(categorical_vars) - 1)) {
   for (j in (i + 1):length(categorical_vars)) {
     # Create the plot
@@ -152,29 +148,27 @@ for (i in 1:(length(categorical_vars) - 1)) {
   }
 }
 ```
-comments
-\
-distribution characterisitcs
-\
+
+### Comments
+
+Distribution characterisitcs:
+
 The distribution of particulate matter levels is generally right-skewed, indicating that a small number of observations have significantly high levels of particulate matter while most observations are clustered at lower levels. The presence of outliers suggests variations in local conditions affecting air quality.
-\
+
 Observed Relationships
-\
+
 1. Traffic Density: A positive correlation exists between particulate matter levels and traffic density, suggesting that areas with higher vehicle traffic tend to experience elevated levels of particulate matter.
-\
+
 2. Urban Greenery: A negative trend is observed, where higher urban greenery correlates with lower particulate matter, indicating that vegetation may help mitigate air pollution.
-\
+
 3. Temperature and Wind Speed: No strong relationship was identified between particulate matter and temperature. However, there is a slight negative correlation with wind speed, indicating that higher wind speeds may help disperse particulate matter.
 
 Potential Collinearity
-\
+
 Some potential collinearity is observed among the explanatory variables, particularly between traffic density and urban greenery. High traffic areas often have less vegetation, leading to a relationship that may confound the analysis. Additionally, temperature and wind speed may also exhibit collinearity, as changes in one could affect the other.
 
-
-
-
 # Section 3
-simple linear regression
+## Simple linear regression
 ```{r}
 X <- cbind(1,data_tidy_air_quality$traffic_density)
 
@@ -193,19 +187,14 @@ c_ii <- diag(Cmat)
 
 std.error <- sqrt(s2 * c_ii)
 std.error
-mod1<-lm(data_tidy_air_quality$particulate_matter ~ data_tidy_air_quality$traffic_density, data = data_tidy_air_quality)
-
-summary(mod1)
 ```
-hypthesis test
-```{r}
 
+## Hpothesis Test
 
-# Summary of ANOVA results
-summary(aov(particulate_matter ~ industrial_activity, data = data_tidy_air_quality))
-
+```{r echo=TRUE}
 # Calculate F-statistic and p-value manually
-group_means <- tapply(data_tidy_air_quality$particulate_matter, data_tidy_air_quality$industrial_activity, mean)
+group_means <- tapply(data_tidy_air_quality$particulate_matter,
+                      data_tidy_air_quality$industrial_activity, mean)
 overall_mean <- mean(data_tidy_air_quality$particulate_matter)
 
 # Calculate SST
@@ -216,7 +205,8 @@ n <- table(data_tidy_air_quality$industrial_activity)
 SStreatment <- sum(n * (group_means - overall_mean)^2)
 
 # Calculate SSerror
-group_means_vector <- unlist(tapply(data_tidy_air_quality$particulate_matter, data_tidy_air_quality$industrial_activity, mean)[data_tidy_air_quality$industrial_activity])
+group_means_vector <- unlist(tapply(data_tidy_air_quality$particulate_matter, data_tidy_air_quality$industrial_activity, mean)
+[data_tidy_air_quality$industrial_activity])
 SSerror <- sum((data_tidy_air_quality$particulate_matter - group_means_vector)^2)
 
 # Calculate degrees of freedom
@@ -232,8 +222,6 @@ MSerror <- SSerror / DFerror
 
 # Calculate F-statistic
 F_statistic <- MStreatment/MSerror
-
-# Output F-statistic
 F_statistic
 
 # Calculate p-value
