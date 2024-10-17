@@ -289,7 +289,7 @@ The errors will be sampled from a uniform distribution where $e \sim U(a,b)$ wit
 
 For a uniform distribution $e \sim U(a,b)$ with a variance $\sigma^2$ = 100, $Var(e) = \frac{(b-a)^2}{12}$. Solving for $a$ and $b$ we get $a = -17.32$ and $b= 17.32$
 
-To simulate our data, we ran a loop 1000 times, and in each simulation, we used runif(length(temperature), min = a, max = b) function in R to generate random errors. Next calculated $Y_{i}=30 + e$. We then used the lm function to fit our regression model. We extacted p values from our model, and ran ifelse statement to check whether our null hypothesis was rejected or not. Finally, we counted the number of null hypothesises rejected and we observed that our type 1 error rate for this scenario is 0.043
+To simulate our data, we created a function 'run_simulation' which runs a simulation once. In a simulation, we used 'runif(length(temperature), min = a, max = b)'   to generate random errors. Next calculated $Y_{i}=30 + e$. We then used the lm function to fit our regression model. We extracted p values from our model, and ran ifelse statement to check whether our null hypothesis was rejected or not. Then we used the 'textit{replicate()' function to repeat each procedure 1000 times. Finally, we counted the number of null hypothesis rejected and we observed that our type 1 error rate for this scenario is 0.043
 
 Type I error is the probability of incorrectly rejecting the null hypothesis when it is true (false positive). Under the null hypothesis, the expected Type I error rate should be equal to the chosen significance level, typically 0.05.
 
@@ -300,7 +300,6 @@ Inflated Type I error rate: The test may incorrectly reject the null hypothesis 
 
 ```{r include=FALSE}
 library(tidyverse)
-
 # Set the seed for reproducibility
 set.seed(123)
 
@@ -309,16 +308,12 @@ n_simulations <- 1000
 
 temperature <- data_tidy_air_quality$temperature
 
-# Initialize a vector to store whether the null hypothesis was rejected in each simulation
-reject_null <- numeric(n_simulations)
-
-
 # Variance of the uniform distribution needs to be 100, so we calculated b = 17.32
 a <- -17.32
 b <- 17.32
 
-# Run simulations
-for (i in 1:n_simulations) {
+# Function to run a single simulation
+run_simulation <- function() {
   
   # Generate error term e ~ Uniform(a, b)
   e <- runif(length(temperature), min = a, max = b)
@@ -326,30 +321,31 @@ for (i in 1:n_simulations) {
   # Generate Y = 30 + e (since b1 = 0)
   Y <- 30 + e
   
-  
   # Fit the linear model Y = b0 + b1 * temperature
   model <- lm(Y ~ temperature)
   
-  # Perform hypothesis test on b1 (null hypothesis: b1 = 0) and extract from lm
+  # Perform hypothesis test on b1 (null hypothesis: b1 = 0) and extract p-value
   p_value <- summary(model)$coefficients[2, 4]
   
-  # Record if the null hypothesis is rejected (a = 0.05)
-  reject_null[i] <- ifelse(p_value < 0.05, 1, 0)
+  # Return whether the null hypothesis is rejected (a = 0.05)
+  return(ifelse(p_value < 0.05, 1, 0))
+}
 
-  }
+# Run all simulations using replicate 
+reject_null <- replicate(n_simulations, run_simulation())
 
 # Calculate Type I error rate (proportion of times the null was incorrectly rejected)
-type_1_error_rate <-mean(reject_null)
+type_1_error_rate <- mean(reject_null)
 
 # Output the Type I error rate
-
 type_1_error_rate
 ```
 
 # Scenario B:
 
 ## Methodology and discussion of results for Scenario B
-Again we run a loop of 1000 simulations. In each simulation, We simulate the error variances using the normal distribution with mean of 100 and variance of 50. We then ensure that the variances are positive by taking the absolute value of the simulated variances. Then we simulated error terms using a normal distribution with a mean of 0 and a variance  of our error_variance calculated before. This ensures that our errors have a non constant variance. We then repeated the same steps as above to obtain our type 1 error rate. Our observated type 1 error rate is 0.047.
+
+Again we created a single function to run a single simulation. In each simulation, We simulate the error variances using the normal distribution with mean of 100 and variance of 50. We then ensure that the variances are positive by taking the absolute value of the simulated variances. Then we simulated error terms using a normal distribution with a mean of 0 and a variance  of our error_variance calculated before. This ensures that our errors have a non constant variance. We then repeated the same steps as above to obtain our type 1 error rate. Our observated type 1 error rate is 0.047.
 
 Impact of Heteroscedasticity:
 Effect on Type I Error Rate: Heteroscedasticity violates the assumption of constant variance in regression models. This leads to incorrect estimates of standard errors and, consequently, incorrect p-values. As a result, the Type I error rate will likely increase beyond the nominal 0.05 level.
@@ -363,13 +359,17 @@ The model has adjusted in such a way that it becomes harder to reject the null h
 ```{r include=FALSE}
 # For reproducibility
 set.seed(123)
-n <- length(temperature)  # Number of observations in temperature data
 
-reject_null <- numeric(n_simulations)  # To store whether the null hypothesis is rejected
+# Number of observations in temperature data
+n <- length(temperature)
 
-for (i in 1:n_simulations) {
+# Number of simulations
+n_simulations <- 1000
+
+# Function to run a single simulation
+run_simulation <- function() {
+  
   # Simulate heteroscedastic errors with mean variance 100 and variance of the variances = 50
-  # Generate different variances for each observation, ensuring mean is 100 and variance is 50
   error_variances <- rnorm(n, mean = 100, sd = sqrt(50))  # Variance of each error term
   e <- rnorm(n, mean = 0, sd = sqrt(error_variances))  # Simulated errors with heteroscedasticity
   
@@ -382,30 +382,35 @@ for (i in 1:n_simulations) {
   # Perform hypothesis test for beta_1 (test if beta_1 = 0)
   p_value <- summary(model)$coefficients[2, 4]  # Extract p-value for temperature coefficient
   
-  # Record whether the null hypothesis is rejected (p-value < 0.05)
-  reject_null[i] <- as.numeric(p_value < 0.05)
+  # Return whether the null hypothesis is rejected (p-value < 0.05)
+  return(as.numeric(p_value < 0.05))
 }
+
+# Run all simulations using replicate
+reject_null <- replicate(n_simulations, run_simulation())
 
 # Calculate the Type I error rate (proportion of rejected null hypotheses)
 type_1_error_rate <- mean(reject_null)
 
 # Print the Type I error rate
 type_1_error_rate
-error_variances
+
 ```
 
 
 # Scenario C:
 
 ## Methodology and discussion of results for Scenario C:
-Using our loop again, we run 1000 simulations,but this time we test the dependence of errors in our model. To generate Correlated errrors in our model we, use the provided function given to us. As above we repeated the same steps in order to obtain the proportion of the number of times our null hypothesis  was incorrectly rejected. OUr type 1 errot rate was 0.053.
+Using our function again, we replicate 1000 simulations,but this time we test the dependence of errors in our model. To generate Correlated errrors in our model we, use the provided function given to us. As above we repeated the same steps in order to obtain the proportion of the number of times our null hypothesis  was incorrectly rejected. OUr type 1 errot rate was 0.053.
 
 Autocorrelation violates the assumption of independent errors in linear regression. This can lead to incorrect standard errors for the regression coefficients, making hypothesis tests less reliable.
 
 Typically, autocorrelated errors inflate Type I errors if unaccounted for because the model underestimates the true error variability. However, depending on the specific pattern of autocorrelation and sample size, this effect can vary.
 ```{r include=FALSE}
-set.seed(123)  
+# Set the seed for reproducibility
+set.seed(123)
 
+# Get the temperature data
 temperature <- data_tidy_air_quality$temperature
 
 n <- length(temperature)  # Number of observations in temperature data
@@ -423,13 +428,12 @@ generate_ar1_errors <- function(n, rho, var_epsilon) {
   for (i in 2:n) {
     epsilon[i] <- rho * epsilon[i - 1] + u[i]
   }
-  epsilon
+  return(epsilon)
 }
 
-reject_null <- numeric(n_sim)  # To store whether the null hypothesis is rejected
-
-for (i in 1:n_sim) {
-  # Generate autocorrelated errors with Corr(epsilon_i, epsilon_(i+1)) = 0.3
+# Function to run a single simulation
+run_simulation <- function(n, rho, var_epsilon) {
+  # Generate autocorrelated errors
   e <- generate_ar1_errors(n, rho, var_epsilon)
   
   # Generate Y values under null hypothesis (beta_1 = 0)
@@ -441,9 +445,12 @@ for (i in 1:n_sim) {
   # Perform hypothesis test for beta_1 (test if beta_1 = 0)
   p_value <- summary(model)$coefficients[2, 4]  # Extract p-value for temperature coefficient
   
-  # Record whether the null hypothesis is rejected (p-value < 0.05)
-  reject_null[i] <- as.numeric(p_value < 0.05)
+  # Return whether the null hypothesis is rejected (p-value < 0.05)
+  return(as.numeric(p_value < 0.05))
 }
+
+# Run all simulations using replicate
+reject_null <- replicate(n_sim, run_simulation(n, rho, var_epsilon))
 
 # Calculate the Type I error rate (proportion of rejected null hypotheses)
 type_1_error_rate <- mean(reject_null)
