@@ -55,56 +55,61 @@ install.packages("remotes")
 }
 remotes::install_github("MiguelRodo/DataTidyRodoSTA2005S")
 data("data_tidy_air_quality", package = "DataTidyRodoSTA2005S")
-head(data_tidy_air_quality)
 
 library(ggplot2)
 library(tidyr)
 library(kableExtra)
 ```
 
-## Part One : Analysis
+# Part One : Analysis
 
-# Section 1: Introduction
+## Section 1: Introduction
 
 Air pollution, particularly high levels of particulate matter (PM), is a major environmental and public health issue in South Africa’s urban centers. Exposure to elevated PM levels is linked to respiratory diseases and other serious health conditions. Understanding the factors influencing PM concentrations is crucial for developing policies that improve air quality and protect public health. This analysis seeks to identify the key drivers of air pollution in South Africa's cities, focusing on how various urban, environmental, and socioeconomic factors affect particulate matter levels.
-\
+
 Unknown Factors to Investigate:
-\
+
 Traffic Density: How do varying levels of vehicle traffic contribute to PM levels in different areas?
-\
+
 Industrial Activity: What is the impact of industrial activity near monitoring stations on air quality?
-\
+
 Temperature & Humidity: How do changes in weather conditions, like temperature and humidity, influence PM concentrations?
-\
+
 Wind Speed: How does wind speed affect the dispersion or accumulation of particulate matter in urban areas?
-\
+
 Day of the Week & Public Holidays: Do patterns of human activity on weekdays, weekends, and holidays significantly influence pollution levels?
-\
+
 Urban Greenery: How effective are green spaces in reducing air pollution in densely populated areas?
 
 # Objective
-\
-The goal of this analysis is to explore the relationships between PM levels and these explanatory variables. By identifying the most influential factors, we aim to inform urban planning and public health strategies that address air pollution and improve the quality of life in South African cities.
 
+The goal of this analysis is to explore the relationships between PM levels and these explanatory variables. By identifying the most influential factors, we aim to inform urban planning and public health strategies that address air pollution and improve the quality of life in South African cities.
 
 
 ## Section 2 : Data Exploration
 
-density plot
+### Density plot
 
-```{r pressure, echo=FALSE}
+```{r pressure, echo=FALSE, warning=FALSE}
+mean_particle <- mean(data_tidy_air_quality$particulate_matter)
+sd_particle <- sd(data_tidy_air_quality$particulate_matter)
+
+ggplot(data_tidy_air_quality, aes(x=particulate_matter))+
+  geom_histogram(fill="deepskyblue3", color="black", binwidth = 3, aes(y=..density..))+
+  stat_function(fun=dnorm, args=list(mean=mean_particle, sd=sd_particle), color="firebrick4", size=1.2)+
+  labs(title="Density Plot of Particulate Matter", y="Density", x="Particulate Matter")
 ```
 
-pairwsie plots
+### Pairwsie Plots
 
-```{r}
+```{r echo=FALSE, warning=FALSE}
 continuous_vars <- data_tidy_air_quality[, sapply(data_tidy_air_quality, is.numeric)]
-pairs(continuous_vars, main = "Pairwise Scatterplots of Continuous Variables")
+pairs(continuous_vars, main = "Pairwise Scatterplots of Continuous Variables",)
 ```
 
-categorial variable plots
+### Categorial Variable Plots
 
-```{r}
+```{r echo=FALSE, warning=FALSE}
 data_tidy_air_quality$industrial_activity <- factor(data_tidy_air_quality$industrial_activity, 
                                    levels = c("None","Low", "Moderate", "High"))  # Adjust the levels according to your data
 
@@ -130,18 +135,9 @@ for (var in categorical_vars) {
   print(plt)  # Print the plot
 }
 ```
-tabular representation of relationship between categorial variables
-```{r}
-for (i in 1:(length(categorical_vars)-1)) {
-  for (j in (i+1):length(categorical_vars)) {
-    cat("Contingency Table for", categorical_vars[i], "and", categorical_vars[j], "\n")
-    print(table(data_tidy_air_quality[[categorical_vars[i]]], data_tidy_air_quality[[categorical_vars[j]]]))
-    cat("\n")
-  }
-}
-```
-visual representation of relationship between categorial variables
-```{r}
+
+### Visual Representation of Relationship between Categorial Variables
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 for (i in 1:(length(categorical_vars) - 1)) {
   for (j in (i + 1):length(categorical_vars)) {
     # Create the plot
@@ -158,29 +154,27 @@ for (i in 1:(length(categorical_vars) - 1)) {
   }
 }
 ```
-comments
-\
-distribution characterisitcs
-\
+
+### Comments
+
+Distribution characterisitcs:
+
 The distribution of particulate matter levels is generally right-skewed, indicating that a small number of observations have significantly high levels of particulate matter while most observations are clustered at lower levels. The presence of outliers suggests variations in local conditions affecting air quality.
-\
+
 Observed Relationships
-\
+
 1. Traffic Density: A positive correlation exists between particulate matter levels and traffic density, suggesting that areas with higher vehicle traffic tend to experience elevated levels of particulate matter.
-\
+
 2. Urban Greenery: A negative trend is observed, where higher urban greenery correlates with lower particulate matter, indicating that vegetation may help mitigate air pollution.
-\
+
 3. Temperature and Wind Speed: No strong relationship was identified between particulate matter and temperature. However, there is a slight negative correlation with wind speed, indicating that higher wind speeds may help disperse particulate matter.
 
 Potential Collinearity
-\
+
 Some potential collinearity is observed among the explanatory variables, particularly between traffic density and urban greenery. High traffic areas often have less vegetation, leading to a relationship that may confound the analysis. Additionally, temperature and wind speed may also exhibit collinearity, as changes in one could affect the other.
 
-
-
-
 # Section 3
-simple linear regression
+## Simple linear regression
 ```{r}
 X <- cbind(1,data_tidy_air_quality$traffic_density)
 
@@ -199,30 +193,26 @@ c_ii <- diag(Cmat)
 
 std.error <- sqrt(s2 * c_ii)
 std.error
-mod1<-lm(data_tidy_air_quality$particulate_matter ~ data_tidy_air_quality$traffic_density, data = data_tidy_air_quality)
-
-summary(mod1)
 ```
-hypthesis test
-```{r}
 
+## Hpothesis Test
 
-# Summary of ANOVA results
-summary(aov(particulate_matter ~ industrial_activity, data = data_tidy_air_quality))
-
+```{r echo=TRUE}
 # Calculate F-statistic and p-value manually
-group_means <- tapply(data_tidy_air_quality$particulate_matter, data_tidy_air_quality$industrial_activity, mean)
+group_means <- tapply(data_tidy_air_quality$particulate_matter,
+                      data_tidy_air_quality$industrial_activity, mean)
 overall_mean <- mean(data_tidy_air_quality$particulate_matter)
 
 # Calculate SST
 SST <- sum((data_tidy_air_quality$particulate_matter - overall_mean)^2)
 
-# Calculate SSB
+# Calculate SStreatment
 n <- table(data_tidy_air_quality$industrial_activity)
 SStreatment <- sum(n * (group_means - overall_mean)^2)
 
-# Calculate SSW
-group_means_vector <- unlist(tapply(data_tidy_air_quality$particulate_matter, data_tidy_air_quality$industrial_activity, mean)[data_tidy_air_quality$industrial_activity])
+# Calculate SSerror
+group_means_vector <- unlist(tapply(data_tidy_air_quality$particulate_matter, data_tidy_air_quality$industrial_activity, mean)
+[data_tidy_air_quality$industrial_activity])
 SSerror <- sum((data_tidy_air_quality$particulate_matter - group_means_vector)^2)
 
 # Calculate degrees of freedom
@@ -238,8 +228,6 @@ MSerror <- SSerror / DFerror
 
 # Calculate F-statistic
 F_statistic <- MStreatment/MSerror
-
-# Output F-statistic
 F_statistic
 
 # Calculate p-value
@@ -260,7 +248,7 @@ confint_rows <-row.names(confint_df)
 row_orders = c(confint_rows[1:8], "temperature:humidity", confint_rows[10:length(confint_rows) - 1])
 confint_df_reordered <- confint_df[row_orders,c("2.5 %", "Estimate", "97.5 %")]
 
-confint_table <- kable(confint_df_reordered, digits = 4, align="c", caption="Confidence Interval for each Coefficients") |>
+confint_table <- kable(confint_df_reordered, digits = 4, align="c", caption="Confidence Interval for each Coefficient") |>
   kable_styling(font_size = 12) |>
   pack_rows(index= c("Intercept"=1, "Traffic Density"=1, "Industrial Activity"=3, "Natural Factors" = 4, "Day of Week"=6, "Holiday"=1, "Urban Greenery"=1))
 confint_table
@@ -269,7 +257,7 @@ confint_table
 ## Hypothesis Testing
 We'd like to perform hypothesis tests on the following variables: Temperature, Humidity, Industrial Levels, and Day of Week.
 
-We'll start by examining whether Temperature has an effect on the concentration of Particulate Matter. We'll use the following We use the following set of hypothesis:
+We'll start by examining whether Temperature has an effect on the concentration of Particulate Matter. We'll use the following set of hypothesis:
 
 
 \[
@@ -279,8 +267,8 @@ We'll start by examining whether Temperature has an effect on the concentration 
 \end{aligned}\]
 
 \
-This can be done by comparing the restricted and un restricted model:
-$$Y_R = \beta_0 + \beta_{traffic}X + $$
+We'll compare the restricted model with the unrestricted model:
+
 ```{r, eval=FALSE}
 model_unrestricted <- lm(particulate_matter ~ . + 
                          temperature:humidity,
@@ -300,6 +288,7 @@ We now test for the effect of humidity. Repeating the same procedure, we obtain 
 &H_A: \beta_{hum} \neq 0 \text{ and } \beta_{hum:temp} \neq 0
 \end{aligned}
 \]
+
 
 
 ```{r, eval=FALSE}
@@ -353,88 +342,115 @@ We obtain a P-value of 0.0707, suggesting that there's no evidence that supports
 ## Intepretation
 From the summary output and the F test for Natural Factors, we get that only Moderate Industrial Activity (p-value: 0.03), Traffic Density (p-value: 0.0155), Urban Greenery (p-value: < 0.0001), and Humidity (p-value: < 0.0001) have a significant effect (p value less than or equal to 0.05) on the concentration of particulate matters.
 
-The average increase in concentration of particulate matter by Moderate Industrial Activity is estimated to be 6.4545 $\frac{\mu g}{m^3}$(CI95%: 0.6047, 12.3043), indicating a significant positive association between the two factors. The average increase in concentration of particulate matter caused by Traffic Density, that is one extra vehicle per hour, is estimated to be 0.0799 $\frac{\mu g}{m^3}$ (CI95%: 0.0155, 0.1444), indicating a positive association. The average decrease in concentration of particulate matter caused by a unit in the percentage of area covered by Urban Greenery is estimated to be 0.2954 $\frac{\mu g}{m^3}$ (CI95%:-0.4142, -0.1766), indicating a negative association between the two. The effect of humidity can interact with temperature, and is thus not independent of other factors. Using the anova model, we can only deduce that there is likely an effect, but we can't be certain about the confidence interval.
+The average increase in concentration of particulate matter by Moderate Industrial Activity is estimated to be 6.4545 $\frac{\mu g}{m^3}$(CI95%: 0.6047, 12.3043), indicating a positive association between the two factors, although the amount of increase is unclear as the confidence interval is quite wide. The average increase in concentration of particulate matter caused by Traffic Density, that is one extra vehicle per hour, is estimated to be 0.0799 $\frac{\mu g}{m^3}$ (CI95%: 0.0155, 0.1444), indicating a positive association. The average decrease in concentration of particulate matter caused by a unit increase in the percentage of area covered by Urban Greenery is estimated to be 0.2954 $\frac{\mu g}{m^3}$ (CI95%:-0.4142, -0.1766), indicating a negative association between the two. The effect of humidity interacts with the effects of temperature. Using the anova model, we can only examine the effects of humidity and humidity:temperature separately.
 
 # part 2
 ## Scenario A
 
+## Scenario A:
 ### Methodology
-Under the null hypothesis, the response variable is not related to temperature. We have that $\beta_0 = 0$, which means that the response variable $Y = 30 + \epsilon$ where $\epsilon$ is some random noises. We violated the model assumption by making $\epsilon \sim Unif(-17.32, 17.32)$ where $Var(\epsilon) = 100$, as opposed to being normally distributed.
+We know that there is no correlation between temperature and the response variable as the variation in it is caused by random noises. So any rejection of the null hypothesis is a type I error.
 
-```{r}
+Simulation under the null hypothesis ($\beta_{1}$= 0):
+
+We simulate the data assuming $\beta_{0}$ = 30, $\beta_{1}$= 0, and errors are uniformly distributed.
+The errors will be sampled from a uniform distribution where $e \sim U(a,b)$ with the constraint that $Var(e)$ = 100
+
+For a uniform distribution $e \sim U(a,b)$ with a variance $\sigma^2$ = 100, $Var(e) = \frac{(b-a)^2}{12}$. Solving for $a$ and $b$ we get $a = -17.32$ and $b= 17.32$
+
+To simulate our data, we created a function 'run_simulation' which runs a simulation once. In a simulation, we used _runif(length(temperature), min = a, max = b)_   to generate random errors. Next calculated $Y_{i}=30 + e$ as the vector of response variables for the trial. We then used the lm function to fit our regression model. We extracted p values from our model, and ran _ifelse_ statement to check whether our null hypothesis was rejected or not, at 5% significance level. Then we used the _replicate()_ function to run the simulation 1000 times. Finally, we counted the number of null hypothesis rejected and we observed that our type 1 error rate for this scenario is 0.043 _0.054_
+
+### Results
+Type I error is the probability of incorrectly rejecting the null hypothesis when it is true (false positive). Under the null hypothesis, the expected Type I error rate should be equal to the chosen significance level, typically 0.05. 
+
+We have found that the Type I error rate is 0.044, which is less than the expected 0.05. This is because a uniform distribution is bounded, meaning that values drawn from it are more tightly spread compared to values drawn from a normal distribution, which can take on more extreme values due to its unbounded nature. This results in the simulated error term, and thus the response variable, having less variation. This leads to \beta_1 being less likely to deviate from zero, as stated by the null hypothesis.
+
+For interest's sake, if we increase the number of simulations to 10000, the Type I error rate becomes 0.0501, which is much closer to the expected 0.05. However, if we fix the number of simulations to 1000 and reduce each sample size to only 3 observations, the Type I error rate drops to 0.036, which is much smaller than the expected 0.05.
+
+This can be explained by the fact that despite the model violation (using uniformly distributed errors instead of normally distributed ones), the Central Limit Theorem helps mitigate the impact as the sample size increases. With 150 observations per sample and 10000 samples in total, the distribution of the sample means of the estimated coefficients approaches normality, making the Type I error rate approach the expected value.. With smaller sample sizes, the uniform errors result in less variation in the estimates, leading to a lower Type I error rate.
+
+
+```{r include=FALSE}
 library(tidyverse)
-
 # Set the seed for reproducibility
 set.seed(123)
 
 # Number of simulations
-n_simulations <- 1000
+n_simulations <- 10000
 
 temperature <- data_tidy_air_quality$temperature
-
-# Initialize a vector to store whether the null hypothesis was rejected in each simulation
-#reject_null <- numeric(n_simulations)
-
-reject_counter <- 0
 
 # Variance of the uniform distribution needs to be 100, so we calculated b = 17.32
 a <- -17.32
 b <- 17.32
 
-# Run simulations
-for (i in 1:n_simulations) {
+# Function to run a single simulation
+run_simulation <- function() {
   
   # Generate error term e ~ Uniform(a, b)
   e <- runif(length(temperature), min = a, max = b)
+  e_small<-runif(3, a, b)
   e_norm <- rnorm(length(temperature), 0, var(temperature))
   
   # Generate Y = 30 + e (since b1 = 0)
   Y <- 30 + e
   
-  
   # Fit the linear model Y = b0 + b1 * temperature
   model <- lm(Y ~ temperature)
+  #model_small <- lm(Y ~ temperature[1:3])
   
-  # Perform hypothesis test on b1 (null hypothesis: b1 = 0) and extract from lm
+  # Perform hypothesis test on b1 (null hypothesis: b1 = 0) and extract p-value
   p_value <- summary(model)$coefficients[2, 4]
-  p_value
   
-  # Record if the null hypothesis is rejected (a = 0.05)
-  #reject_null[i] <- ifelse(p_value < 0.05, 1, 0)
-  if (p_value < 0.05){
-    reject_counter <- reject_counter + 1
-  }
+  # Return whether the null hypothesis is rejected (a = 0.05)
+  return(ifelse(p_value < 0.05, 1, 0))
+}
 
-  }
+
+# Run all simulations using replicate 
+reject_null <- replicate(n_simulations, run_simulation())
 
 # Calculate Type I error rate (proportion of times the null was incorrectly rejected)
-#type_1_error_rate <-(1000-sum(reject_null))/1000
-type_1_error_rate <- (reject_counter)/1000
+
+type_1_error_rate <- mean(reject_null)
 
 # Output the Type I error rate
-
 type_1_error_rate
 ```
-### Results
-We obtain a type 1 error rate of 0.054, which is not too far from 0.05. Indicating that this model assumption does not significantly affect the type 1 error rate. This can be explained by central limit theorem, with the sampling distribution of e converges to a normal distribution. (For interest's sake, if we change the simulation count to 10000, the type 1 error rate becomes 0.0501, even closer to 0.05)
-
-scenario b
-```{r}
-set.seed(123)  # For reproducibility
-
-# Load data (assuming temperature values are stored in 'temperature' variable)
-temperature <- data_tidy_air_quality$temperature
-
-n <- length(temperature)  # Number of observations in temperature data
 
 
-reject_null <- numeric(n_simulations)  # To store whether the null hypothesis is rejected
+## Scenario B:
 
-for (i in 1:n_simulations) {
+### Methodology and discussion of results for Scenario B
+
+Again we created a single function to run a single simulation. In each simulation, We simulate the error variances using the normal distribution with mean of 100 and variance of 50. We then ensure that the variances are positive by taking the absolute value of the simulated variances. Then we simulated error terms using a normal distribution with a mean of 0 and a variance  of our error_variance calculated before. This ensures that our errors have a non constant variance. We then repeated the same steps as above to obtain our type 1 error rate. Our observated type 1 error rate is 0.047.
+
+Impact of Heteroscedasticity:
+Effect on Type I Error Rate: Heteroscedasticity violates the assumption of constant variance in regression models. This leads to incorrect estimates of standard errors and, consequently, incorrect p-values. As a result, the Type I error rate will likely increase beyond the nominal 0.05 level.
+
+Our error rate is lower than 0,05. There could be a few reasons for this:
+
+Conservative Hypothesis Test: Our test may be too conservative. This means the test is less likely to reject the null hypothesis even when it might be warranted. It could happen if:
+The variability of the errors isn't large enough to make the standard errors inaccurate in a way that increases the Type I error.
+
+The model has adjusted in such a way that it becomes harder to reject the null hypothesis, potentially overcorrecting for the heteroscedasticity.
+```{r include=FALSE}
+# For reproducibility
+set.seed(123)
+
+# Number of observations in temperature data
+n <- length(temperature)
+
+# Number of simulations
+n_simulations <- 1000
+
+# Function to run a single simulation
+run_simulation <- function() {
+  
   # Simulate heteroscedastic errors with mean variance 100 and variance of the variances = 50
-  # Generate different variances for each observation, ensuring mean is 100 and variance is 50
-  variances <- rnorm(n, mean = 100, sd = sqrt(50))  # Variance of each error term
-  e <- rnorm(n, mean = 0, sd = sqrt(abs(variances)))  # Simulated errors with heteroscedasticity
+  error_variances <- rnorm(n, 100, sqrt(50)) # Variance of each error term
+  variance_gamma <- rgamma(n, shape=200, rate=2)
+  e <- rnorm(n, mean = 0, error_variances)  # Simulated errors with heteroscedasticity
   
   # Generate Y values under null hypothesis (beta_1 = 0)
   Y <- 30 + e
@@ -445,25 +461,42 @@ for (i in 1:n_simulations) {
   # Perform hypothesis test for beta_1 (test if beta_1 = 0)
   p_value <- summary(model)$coefficients[2, 4]  # Extract p-value for temperature coefficient
   
-  # Record whether the null hypothesis is rejected (p-value < 0.05)
-  reject_null[i] <- as.numeric(p_value < 0.05)
+  # Return whether the null hypothesis is rejected (p-value < 0.05)
+  return(as.numeric(p_value < 0.05))
 }
 
+# Run all simulations using replicate
+reject_null <- replicate(n_simulations, run_simulation())
+
 # Calculate the Type I error rate (proportion of rejected null hypotheses)
-type_1_error_rate <- (1000-sum(reject_null))/1000
+type_1_error_rate <- mean(reject_null)
 
 # Print the Type I error rate
 type_1_error_rate
-```
-scenario C
-```{r}
-set.seed(123)  # For reproducibility
 
-# Load data (assuming temperature values are stored in 'temperature' variable)
+```
+
+
+## Scenario C:
+
+### Methodology and discussion of results for Scenario C:
+Using our function again, we replicate 1000 simulations,but this time we test the dependence of errors in our model. To generate Correlated errrors in our model we, use the provided function given to us. As above we repeated the same steps in order to obtain the proportion of the number of times our null hypothesis  was incorrectly rejected. OUr type 1 errot rate was 0.053.
+
+Autocorrelation violates the assumption of independent errors in linear regression. This can lead to incorrect standard errors for the regression coefficients, making hypothesis tests less reliable.
+
+Typically, autocorrelated errors inflate Type I errors if unaccounted for because the model underestimates the true error variability. However, depending on the specific pattern of autocorrelation and sample size, this effect can vary.
+```{r include=FALSE}
+# Set the seed for reproducibility
+set.seed(123)
+
+# Get the temperature data
 temperature <- data_tidy_air_quality$temperature
 
 n <- length(temperature)  # Number of observations in temperature data
 n_sim <- 1000  # Number of simulations
+
+rho <- 0.3  # Autocorrelation coefficient
+var_epsilon <- 100  # Desired variance of errors
 
 # Function to generate autocorrelated errors
 generate_ar1_errors <- function(n, rho, var_epsilon) {
@@ -474,16 +507,12 @@ generate_ar1_errors <- function(n, rho, var_epsilon) {
   for (i in 2:n) {
     epsilon[i] <- rho * epsilon[i - 1] + u[i]
   }
-  epsilon
+  return(epsilon)
 }
 
-rho <- 0.3  # Autocorrelation coefficient
-var_epsilon <- 100  # Desired variance of errors
-
-reject_null <- numeric(n_sim)  # To store whether the null hypothesis is rejected
-
-for (i in 1:n_sim) {
-  # Generate autocorrelated errors with Corr(epsilon_i, epsilon_(i+1)) = 0.3
+# Function to run a single simulation
+run_simulation <- function(n, rho, var_epsilon) {
+  # Generate autocorrelated errors
   e <- generate_ar1_errors(n, rho, var_epsilon)
   
   # Generate Y values under null hypothesis (beta_1 = 0)
@@ -495,12 +524,15 @@ for (i in 1:n_sim) {
   # Perform hypothesis test for beta_1 (test if beta_1 = 0)
   p_value <- summary(model)$coefficients[2, 4]  # Extract p-value for temperature coefficient
   
-  # Record whether the null hypothesis is rejected (p-value < 0.05)
-  reject_null[i] <- as.numeric(p_value < 0.05)
+  # Return whether the null hypothesis is rejected (p-value < 0.05)
+  return(as.numeric(p_value < 0.05))
 }
 
+# Run all simulations using replicate
+reject_null <- replicate(n_sim, run_simulation(n, rho, var_epsilon))
+
 # Calculate the Type I error rate (proportion of rejected null hypotheses)
-type_1_error_rate <- (1000-sum(reject_null))/1000
+type_1_error_rate <- mean(reject_null)
 
 # Print the Type I error rate
 type_1_error_rate

@@ -44,53 +44,44 @@ summary_categorical_df <- summary_df[c(3:5, 9:14),]
 summary_table <- kable(summary_categorical_df, digits=4)|>
   kable_styling(font_size = 12)
 
+# For reproducibility
 set.seed(123)
 
+# Number of observations in temperature data
+n <- length(temperature)
+
 # Number of simulations
-n_simulations <- 1000
+n_simulations <- 100
 
-temperature <- data_tidy_air_quality$temperature
-
-# Initialize a vector to store whether the null hypothesis was rejected in each simulation
-reject_null <- numeric(n_simulations)
-
-
-# Variance of the uniform distribution needs to be 100, so we calculated b = 17.32
-a <- -17.32
-b <- 17.32
-
-# Run simulations
-type_1_error_counter <- 0
-for (i in 1:n_simulations) {
+# Function to run a single simulation
+run_simulation <- function() {
   
-  # Generate error term e ~ Uniform(a, b)
-  e <- runif(length(temperature), min = a, max = b)
-  e_pois <- rpois(length(temperature), var(temperature))
-  e_norm <- rnorm(length(temperature),0, var(temperature))
-  # Generate Y = 30 + e (since b1 = 0)
-  Y <- 30 + e_pois
+  # Simulate heteroscedastic errors with mean variance 100 and variance of the variances = 50
+  error_variances <- rnorm(n, mean = 100, sd = sqrt(50)) # Variance of each error term
+  e <- rnorm(n, mean = 0, sd = sqrt(error_variances))  # Simulated errors with heteroscedasticity
+  e_gamma <- rgamma(n, shape=9, scale=0.5)
+  e_chisq <- rchisq(n, 4, ncp = 1)
+  # Generate Y values under null hypothesis (beta_1 = 0)
+  Y <- 30 + e_chisq
   
-  
-  # Fit the linear model Y = b0 + b1 * temperature
+  # Fit the model Y ~ temperature
   model <- lm(Y ~ temperature)
   
-  # Perform hypothesis test on b1 (null hypothesis: b1 = 0) and extract from lm
-  p_value <- summary(model)$coefficients[2, 4]
-  p_value
+  # Perform hypothesis test for beta_1 (test if beta_1 = 0)
+  p_value <- summary(model)$coefficients[2, 4]  # Extract p-value for temperature coefficient
   
-  if (p_value < 0.05) {
-    type_1_error_counter <- 1 + type_1_error_counter
-  }
-  
+  # Return whether the null hypothesis is rejected (p-value < 0.05)
+  return(as.numeric(p_value < 0.05))
 }
 
-# Calculate Type I error rate (proportion of times the null was incorrectly rejected)
-type_1_error_rate <-(type_1_error_counter)/1000
+# Run all simulations using replicate
+reject_null <- replicate(n_simulations, run_simulation())
 
-# Output the Type I error rate
+# Calculate the Type I error rate (proportion of rejected null hypotheses)
+type_1_error_rate <- mean(reject_null)
 
+# Print the Type I error rate
 type_1_error_rate
-
 
 
 
