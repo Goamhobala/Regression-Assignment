@@ -175,24 +175,67 @@ Some potential collinearity is observed among the explanatory variables, particu
 
 # Section 3
 ## Simple linear regression
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+n <- length(data_tidy_air_quality$traffic_density)
+X_bar <- mean(data_tidy_air_quality$traffic_density)
+Y_bar <- mean(data_tidy_air_quality$particulate_matter)
+
 X <- cbind(1,data_tidy_air_quality$traffic_density)
-
 Y <-data_tidy_air_quality$particulate_matter
-bhat <- solve(t(X) %*% X) %*% t(X) %*% Y
 
+bhat <- solve(t(X) %*% X) %*% t(X) %*% Y
 Cmat <- solve(t(X) %*% X)
 
 k <- ncol(X)
 rss <- t(Y - X %*% bhat) %*% (Y - X %*% bhat)
-# Calculate s2 = RSS/(n-k)
-s2 <- as.numeric((rss)/148)
-s2
+
+s2 <- as.numeric((rss)/n-k)
+
 
 c_ii <- diag(Cmat)
 
 std.error <- sqrt(s2 * c_ii)
-std.error
+
+
+t_beta_0<- bhat[1]/std.error[1]
+t_beta_1<- bhat[2]/std.error[2]
+
+
+
+p_beta_1 <-2* pt(t_beta_0, df = n-k,lower.tail=FALSE)
+p_beta_0 <-2* pt(t_beta_0, df = n-k,lower.tail=FALSE)
+
+Y_hat <- bhat[1] + bhat[2]*data_tidy_air_quality$traffic_density
+residuals <- data_tidy_air_quality$particulate_matter - Y_hat
+
+SSE <- sum(residuals^2)
+SST <- sum((data_tidy_air_quality$particulate_matter - Y_bar)^2)
+
+
+R_squared <- (1 - (SSE / SST)) 
+
+Adjusted_R_squared <- 1 - (1 - R_squared) * ((n - 1) / (n - k))
+
+F_statistic <- (SST - SSE) / (SSE / (n-2))
+
+
+coefficients <- data.frame(
+  Estimate = c(bhat[1], bhat[2]),
+  `Std. Error` = c(std.error[1], std.error[2]),
+  `t value` = c(t_beta_0, t_beta_1),
+  `Pr(>|t|)` = c(p_beta_0, p_beta_1)
+)
+rownames(coefficients) <- c("(Intercept)", "traffic_density")
+
+cat("Coefficients:\n")
+print.data.frame(coefficients)
+
+cat("\nResidual standard error:",sqrt(s2),"on 1 and", n-2, "DF" )
+cat("\nMultiple R-squared:",R_squared, "Adjusted R-Squared: ",Adjusted_R_squared)
+cat("\nF-statistic:",F_statistic, "on 1 and", n-2, "DF")
+
+#differences in values and lm function values are due to the rounding.
 ```
 
 ## Hpothesis Test
