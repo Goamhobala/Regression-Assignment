@@ -44,7 +44,49 @@ summary_categorical_df <- summary_df[c(3:5, 9:14),]
 summary_table <- kable(summary_categorical_df, digits=4)|>
   kable_styling(font_size = 12)
 
-model_restricted <- update(multi_model, .~. - temperature - temperature:humidity)
- 
+# For reproducibility
+set.seed(123)
 
-model <- lm(particulate_matter ~ industrial_activityLow + industrial_activityModerate + industrial_activityHigh, data=data_tidy_air_quality)
+# Number of observations in temperature data
+n <- length(temperature)
+
+# Number of simulations
+n_simulations <- 100
+
+# Function to run a single simulation
+run_simulation <- function() {
+  
+  # Simulate heteroscedastic errors with mean variance 100 and variance of the variances = 50
+  error_variances <- rnorm(n, mean = 100, sd = sqrt(50)) # Variance of each error term
+  # Generate e:
+  e <- c()
+  for (i in 1:n){
+    e[i] <- rnorm(1, mean = 0, sd = sqrt(error_variances))
+  }
+  #e <- rnorm(n, mean = 0, sd = sqrt(error_variances))  # Simulated errors with heteroscedasticity
+  # Generate Y values under null hypothesis (beta_1 = 0)
+  Y <- 30 + e
+  
+  # Fit the model Y ~ temperature
+  model <- lm(Y ~ temperature)
+  
+  # Perform hypothesis test for beta_1 (test if beta_1 = 0)
+  p_value <- summary(model)$coefficients[2, 4]  # Extract p-value for temperature coefficient
+  
+  # Return whether the null hypothesis is rejected (p-value < 0.05)
+  return(as.numeric(p_value < 0.05))
+}
+
+# Run all simulations using replicate
+reject_null <- replicate(n_simulations, run_simulation())
+
+# Calculate the Type I error rate (proportion of rejected null hypotheses)
+type_1_error_rate <- mean(reject_null)
+
+# Print the Type I error rate
+type_1_error_rate
+
+
+
+
+

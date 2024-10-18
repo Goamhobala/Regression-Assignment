@@ -7,6 +7,12 @@ author:
     email: yhxjin001@myuct.ac.za
   - name: Saurav Sathnarayan
     email: sthsau001@myuct.ac.za
+nocite: '@*'
+
+abstract: In this report, we explored the efficiency of 6 programming languages through the approximation of $\pi$. We found that efficiency of various programming languages can vary widely, with C and C++ being the most efficient programming languages. We also presented evidence for compiled languages having better performance than interpreted languages. Our results suggest that programmers can benefit from taking the efficiency of various programming languages into account, rather than simply opting for simplicity in the syntax of these languages .
+  
+keywords: Programming Languages, Efficieny, Large-Scaled Iterative Compuations 
+  
 #bibliography: mybibfile.bib
 #nocite: '@*'
   
@@ -285,46 +291,109 @@ confint_rows <-row.names(confint_df)
 row_orders = c(confint_rows[1:8], "temperature:humidity", confint_rows[10:length(confint_rows) - 1])
 confint_df_reordered <- confint_df[row_orders,c("2.5 %", "Estimate", "97.5 %")]
 
-confint_table <- kable(confint_df_reordered, digits = 4, align="c", caption="Confidence Interval for each Coefficients") |>
+confint_table <- kable(confint_df_reordered, digits = 4, align="c", caption="Confidence Interval for each Coefficient") |>
   kable_styling(font_size = 12) |>
   pack_rows(index= c("Intercept"=1, "Traffic Density"=1, "Industrial Activity"=3, "Natural Factors" = 4, "Day of Week"=6, "Holiday"=1, "Urban Greenery"=1))
 confint_table
 ```
 
-### Hypothesis Testing
+## Hypothesis Testing
 We'd like to perform hypothesis tests on the following variables: Temperature, Humidity, Industrial Levels, and Day of Week.
 
-We'll start by examining whether Temperature has an effect on the concentration of Particulate Matter. We'll use the following We use the following set of hypothesis:
-```{r}
-#\begin{align}
-#$$H_0: \beta_{temp} = \beta_{hum:temp} = 0$$ 
-#$$H_A: \beta_{temp} \neq 0 \text{ and } \beta_{hum:temp} \neq 0$$
-#\end{align}
-#\
-#This can be done by comparing the restricted and un restricted model:
-#$$Y_R = \beta_0 + \beta_{traffic}X + $$
-```
+We'll start by examining whether Temperature has an effect on the concentration of Particulate Matter. We'll use the following set of hypothesis:
 
 
+\[
+\begin{aligned}
+&H_0: \beta_{temp} = \beta_{hum:temp} = 0 \\
+&H_A: \beta_{temp} \neq 0 \text{ and } \beta_{hum:temp} \neq 0
+\end{aligned}\]
 
+\
+We'll compare the restricted model with the unrestricted model:
 
-```{r}
+```{r, eval=FALSE}
 model_unrestricted <- lm(particulate_matter ~ . + 
                          temperature:humidity,
                          data=data_tidy_air_quality)
 model_restricted <- update(model_unrestricted, .~.
                            - temperature
                            - temperature:humidity)
-anova(model_unrestricted, model_restricted)
+anova(model_restricted, model_restricted)
  
-
 ```
-Using the anova function in R, we compare the two models with F test, yielding a P value 0.6815, suggesting that temperature doesn't have a significant effect on the concentration of particular matter.
+Using the anova function in R, we compare the two models with F test. The F test yields a P value 0.6815, suggesting that temperature doesn't have a significant effect on the concentration of particular matter.
+
+We now test for the effect of humidity. Repeating the same procedure, we obtain a P value < 0.00001. Suggesting that it's likely that humidity has an effect on the concentration of particulate matters.
+\[
+\begin{aligned}
+&H_0: \beta_{hum} = \beta_{hum:temp} = 0 \\
+&H_A: \beta_{hum} \neq 0 \text{ and } \beta_{hum:temp} \neq 0
+\end{aligned}
+\]
+
+
+
+```{r, eval=FALSE}
+model_unrestricted <- lm(particulate_matter ~ . + 
+                         temperature:humidity,
+                         data=data_tidy_air_quality)
+model_restricted <- update(model_unrestricted, .~.
+                           - humidity
+                           - temperature:humidity)
+anova(model_restricted, model_unrestricted)
+```
+
+
+### Categorical Variables
+For the day of week, we take Monday as the reference category and test for the following set of hypothesis, using the same procedure.
+\[
+\begin{aligned}
+&H_0: \beta_{Tuesday} = \beta_{Wednesday} = \beta_{Thursday} = \beta_{Friday} = \beta_{Saturday} = \beta_{Sunday} = 0 \\
+&H_A: \beta_{Tuesday} \neq 0 \text{ and } \beta_{Wednesday} \neq 0 \text{ and } \beta_{Thursday} \neq 0 \text{ and } \beta_{Friday} \neq 0 \text{ and } \beta_{Saturday} \neq 0 \text{ and } \beta_{Sunday} \neq 0
+\end{aligned}
+\]
+```{r, eval=FALSE}
+data_tidy_air_quality$day_of_week <- 
+  relevel(factor(data_tidy_air_quality$day_of_week), ref="Monday")
+model_unrestricted <- lm(particulate_matter ~ .,
+                         data=data_tidy_air_quality)
+model_restricted <- update(model_unrestricted, .~.
+                           - day_of_week)
+anova(model_restricted, model_unrestricted)
+```
+The P value is 0.7735, indicating that there is no evidence that supports rejecting the null hypothesis.
+
+We do the same for industrial activity, taking No Activity as the reference category to test for the set of hypothesis:
+\[
+\begin{aligned}
+&H_0: \beta_{Low} = \beta_{Moderate} = \beta_{High} = 0 \\
+&H_A: \beta_{Low} \neq 0 \text{ and } \beta_{Moderate} \neq 0 \text{ and } \beta_{High} \neq 0 
+\end{aligned}
+\]
+```{r, eval=FALSE}
+data_tidy_air_quality$industrial_activity <-
+  relevel(factor(data_tidy_air_quality$industrial_activity), ref="None")
+model_unrestricted <- lm(particulate_matter ~ .,
+                         data_tidy_air_quality)
+model_restricted <- lm(particulate_matter ~ . - industrial_activity,
+                       data_tidy_air_quality)
+anova(model_restricted, model_unrestricted)
+```
+We obtain a P-value of 0.0707, suggesting that there's no evidence that supports rejecting the null hypothesis at 5% significance level.
+
+## Intepretation
+From the summary output and the F test for Natural Factors, we get that only Moderate Industrial Activity (p-value: 0.03), Traffic Density (p-value: 0.0155), Urban Greenery (p-value: < 0.0001), and Humidity (p-value: < 0.0001) have a significant effect (p value less than or equal to 0.05) on the concentration of particulate matters.
+
+The average increase in concentration of particulate matter by Moderate Industrial Activity is estimated to be 6.4545 $\frac{\mu g}{m^3}$(CI95%: 0.6047, 12.3043), indicating a positive association between the two factors, although the amount of increase is unclear as the confidence interval is quite wide. The average increase in concentration of particulate matter caused by Traffic Density, that is one extra vehicle per hour, is estimated to be 0.0799 $\frac{\mu g}{m^3}$ (CI95%: 0.0155, 0.1444), indicating a positive association. The average decrease in concentration of particulate matter caused by a unit increase in the percentage of area covered by Urban Greenery is estimated to be 0.2954 $\frac{\mu g}{m^3}$ (CI95%:-0.4142, -0.1766), indicating a negative association between the two. The effect of humidity interacts with the effects of temperature. Using the anova model, we can only examine the effects of humidity and humidity:temperature separately.
 
 # part 2
-# Scenario A:
+## Scenario A
 
-## Methodology and discussion of results for Scenario A
+## Scenario A:
+### Methodology
+We know that there is no correlation between temperature and the response variable as the variation in it is caused by random noises. So any rejection of the null hypothesis is a type I error.
+
 Simulation under the null hypothesis ($\beta_{1}$= 0):
 
 We simulate the data assuming $\beta_{0}$ = 30, $\beta_{1}$= 0, and errors are uniformly distributed.
@@ -332,14 +401,17 @@ The errors will be sampled from a uniform distribution where $e \sim U(a,b)$ wit
 
 For a uniform distribution $e \sim U(a,b)$ with a variance $\sigma^2$ = 100, $Var(e) = \frac{(b-a)^2}{12}$. Solving for $a$ and $b$ we get $a = -17.32$ and $b= 17.32$
 
-To simulate our data, we created a function 'run_simulation' which runs a simulation once. In a simulation, we used 'runif(length(temperature), min = a, max = b)'   to generate random errors. Next calculated $Y_{i}=30 + e$. We then used the lm function to fit our regression model. We extracted p values from our model, and ran ifelse statement to check whether our null hypothesis was rejected or not. Then we used the 'textit{replicate()' function to repeat each procedure 1000 times. Finally, we counted the number of null hypothesis rejected and we observed that our type 1 error rate for this scenario is 0.043
+To simulate our data, we created a function 'run_simulation' which runs a simulation once. In a simulation, we used _runif(length(temperature), min = a, max = b)_   to generate random errors. Next calculated $Y_{i}=30 + e$ as the vector of response variables for the trial. We then used the lm function to fit our regression model. We extracted p values from our model, and ran _ifelse_ statement to check whether our null hypothesis was rejected or not, at 5% significance level. Then we used the _replicate()_ function to run the simulation 1000 times. Finally, we counted the number of null hypothesis rejected and we observed that our type 1 error rate for this scenario is 0.043 _0.054_
 
-Type I error is the probability of incorrectly rejecting the null hypothesis when it is true (false positive). Under the null hypothesis, the expected Type I error rate should be equal to the chosen significance level, typically 0.05.
+### Results
+Type I error is the probability of incorrectly rejecting the null hypothesis when it is true (false positive). Under the null hypothesis, the expected Type I error rate should be equal to the chosen significance level, typically 0.05. 
 
-Under a uniform distribution, the error terms tend to be more tightly spread compared to the tails of a normal distribution (which has more extreme values due to its longer tails). This can result in:
+We have found that the Type I error rate is 0.044, which is less than the expected 0.05. This is because a uniform distribution is bounded, meaning that values drawn from it are more tightly spread compared to values drawn from a normal distribution, which can take on more extreme values due to its unbounded nature. This results in the simulated error term, and thus the response variable, having less variation. This leads to \beta_1 being less likely to deviate from zero, as stated by the null hypothesis.
 
-Underestimated variability in the model, leading to more frequent rejections of the null hypothesis when it should not be rejected.
-Inflated Type I error rate: The test may incorrectly reject the null hypothesis more often than expected under the nominal significance level.
+For interest's sake, if we increase the number of simulations to 10000, the Type I error rate becomes 0.0501, which is much closer to the expected 0.05. However, if we fix the number of simulations to 1000 and reduce each sample size to only 3 observations, the Type I error rate drops to 0.036, which is much smaller than the expected 0.05.
+
+This can be explained by the fact that despite the model violation (using uniformly distributed errors instead of normally distributed ones), the Central Limit Theorem helps mitigate the impact as the sample size increases. With 150 observations per sample and 10000 samples in total, the distribution of the sample means of the estimated coefficients approaches normality, making the Type I error rate approach the expected value.. With smaller sample sizes, the uniform errors result in less variation in the estimates, leading to a lower Type I error rate.
+
 
 ```{r include=FALSE}
 library(tidyverse)
@@ -360,12 +432,15 @@ run_simulation <- function() {
   
   # Generate error term e ~ Uniform(a, b)
   e <- runif(length(temperature), min = a, max = b)
+  e_small<-runif(3, a, b)
+  e_norm <- rnorm(length(temperature), 0, var(temperature))
   
   # Generate Y = 30 + e (since b1 = 0)
   Y <- 30 + e
   
   # Fit the linear model Y = b0 + b1 * temperature
   model <- lm(Y ~ temperature)
+  #model_small <- lm(Y ~ temperature[1:3])
   
   # Perform hypothesis test on b1 (null hypothesis: b1 = 0) and extract p-value
   p_value <- summary(model)$coefficients[2, 4]
@@ -374,21 +449,28 @@ run_simulation <- function() {
   return(ifelse(p_value < 0.05, 1, 0))
 }
 
-# Run all simulations using replicate 
+
+# Run all simulations using repliscate 
 reject_null <- replicate(n_simulations, run_simulation())
 
 # Calculate Type I error rate (proportion of times the null was incorrectly rejected)
+
 type_1_error_rate <- mean(reject_null)
 
 # Output the Type I error rate
 type_1_error_rate
 ```
 
-# Scenario B:
 
-## Methodology and discussion of results for Scenario B
+## Scenario B:
 
-Again we created a single function to run a single simulation. In each simulation, We simulate the error variances using the normal distribution with mean of 100 and variance of 50. We then ensure that the variances are positive by taking the absolute value of the simulated variances. Then we simulated error terms using a normal distribution with a mean of 0 and a variance  of our error_variance calculated before. This ensures that our errors have a non constant variance. We then repeated the same steps as above to obtain our type 1 error rate. Our observated type 1 error rate is 0.047.
+### Methodology
+
+Again we created a single function to run a single simulation. In each simulation, We simulate the error variances using the normal distribution with mean of 100 and variance of 50.Then we simulated error terms using a normal distribution with a mean of 0 and a variance of our error_variance calculated before. This ensures that our errors have a non constant variance. We then repeated the same steps as above to obtain our type 1 error rate. Our observed type 1 error rate is 0.042.
+
+
+### Results
+The observed type 1 error rate is 0.046, less than the expected 0.05. This is caused by the heteroscedasticity we intentionally introduced to the model. Constant variance is one of the key assumptions for the Gauss-Markov theorem. By breaking the assumption, the ordinary least square estimate(OLS) for \beta_1, \hat{\beta_1} is no longer guaranteed to be the best  linear unbiased estimate(BLUE), thereby making the type I error rate inaccurate.
 
 Impact of Heteroscedasticity:
 Effect on Type I Error Rate: Heteroscedasticity violates the assumption of constant variance in regression models. This leads to incorrect estimates of standard errors and, consequently, incorrect p-values. As a result, the Type I error rate will likely increase beyond the nominal 0.05 level.
@@ -405,7 +487,6 @@ set.seed(123)
 
 # Number of observations in temperature data
 n <- length(temperature)
-
 # Number of simulations
 n_simulations <- 1000
 
@@ -413,8 +494,9 @@ n_simulations <- 1000
 run_simulation <- function() {
   
   # Simulate heteroscedastic errors with mean variance 100 and variance of the variances = 50
-  error_variances <- rnorm(n, mean = 100, sd = sqrt(50))  # Variance of each error term
-  e <- rnorm(n, mean = 0, sd = sqrt(error_variances))  # Simulated errors with heteroscedasticity
+  error_variances <- abs(rnorm(n, 100, sqrt(50))) # Variance of each error term
+  error_variances_gamma <- rgamma(n, 200, rate = 2)
+  e <- rnorm(n, mean = 0, sqrt(error_variances))  # Simulated errors with heteroscedasticity
   
   # Generate Y values under null hypothesis (beta_1 = 0)
   Y <- 30 + e
@@ -441,9 +523,9 @@ type_1_error_rate
 ```
 
 
-# Scenario C:
+## Scenario C:
 
-## Methodology and discussion of results for Scenario C:
+### Methodology and discussion of results for Scenario C:
 Using our function again, we replicate 1000 simulations,but this time we test the dependence of errors in our model. To generate Correlated errrors in our model we, use the provided function given to us. As above we repeated the same steps in order to obtain the proportion of the number of times our null hypothesis  was incorrectly rejected. OUr type 1 errot rate was 0.053.
 
 Autocorrelation violates the assumption of independent errors in linear regression. This can lead to incorrect standard errors for the regression coefficients, making hypothesis tests less reliable.
