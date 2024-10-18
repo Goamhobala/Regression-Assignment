@@ -58,11 +58,14 @@ run_simulation <- function() {
   
   # Simulate heteroscedastic errors with mean variance 100 and variance of the variances = 50
   error_variances <- rnorm(n, mean = 100, sd = sqrt(50)) # Variance of each error term
-  e <- rnorm(n, mean = 0, sd = sqrt(error_variances))  # Simulated errors with heteroscedasticity
-  e_gamma <- rgamma(n, shape=9, scale=0.5)
-  e_chisq <- rchisq(n, 4, ncp = 1)
+  # Generate e:
+  e <- c()
+  for (i in 1:n){
+    e[i] <- rnorm(1, mean = 0, sd = sqrt(error_variances))
+  }
+  #e <- rnorm(n, mean = 0, sd = sqrt(error_variances))  # Simulated errors with heteroscedasticity
   # Generate Y values under null hypothesis (beta_1 = 0)
-  Y <- 30 + e_chisq
+  Y <- 30 + e
   
   # Fit the model Y ~ temperature
   model <- lm(Y ~ temperature)
@@ -82,6 +85,7 @@ type_1_error_rate <- mean(reject_null)
 
 # Print the Type I error rate
 type_1_error_rate
+
 
 
 

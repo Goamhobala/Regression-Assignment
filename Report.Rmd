@@ -376,7 +376,7 @@ library(tidyverse)
 set.seed(123)
 
 # Number of simulations
-n_simulations <- 10000
+n_simulations <- 1000
 
 temperature <- data_tidy_air_quality$temperature
 
@@ -407,7 +407,7 @@ run_simulation <- function() {
 }
 
 
-# Run all simulations using replicate 
+# Run all simulations using repliscate 
 reject_null <- replicate(n_simulations, run_simulation())
 
 # Calculate Type I error rate (proportion of times the null was incorrectly rejected)
@@ -421,9 +421,13 @@ type_1_error_rate
 
 ## Scenario B:
 
-### Methodology and discussion of results for Scenario B
+### Methodology
 
-Again we created a single function to run a single simulation. In each simulation, We simulate the error variances using the normal distribution with mean of 100 and variance of 50. We then ensure that the variances are positive by taking the absolute value of the simulated variances. Then we simulated error terms using a normal distribution with a mean of 0 and a variance  of our error_variance calculated before. This ensures that our errors have a non constant variance. We then repeated the same steps as above to obtain our type 1 error rate. Our observated type 1 error rate is 0.047.
+Again we created a single function to run a single simulation. In each simulation, We simulate the error variances using the normal distribution with mean of 100 and variance of 50.Then we simulated error terms using a normal distribution with a mean of 0 and a variance of our error_variance calculated before. This ensures that our errors have a non constant variance. We then repeated the same steps as above to obtain our type 1 error rate. Our observed type 1 error rate is 0.042.
+
+
+### Results
+The observed type 1 error rate is 0.046, less than the expected 0.05. This is caused by the heteroscedasticity we intentionally introduced to the model. Constant variance is one of the key assumptions for the Gauss-Markov theorem. By breaking the assumption, the ordinary least square estimate(OLS) for \beta_1, \hat{\beta_1} is no longer guaranteed to be the best  linear unbiased estimate(BLUE), thereby making the type I error rate inaccurate.
 
 Impact of Heteroscedasticity:
 Effect on Type I Error Rate: Heteroscedasticity violates the assumption of constant variance in regression models. This leads to incorrect estimates of standard errors and, consequently, incorrect p-values. As a result, the Type I error rate will likely increase beyond the nominal 0.05 level.
@@ -440,7 +444,6 @@ set.seed(123)
 
 # Number of observations in temperature data
 n <- length(temperature)
-
 # Number of simulations
 n_simulations <- 1000
 
@@ -448,9 +451,9 @@ n_simulations <- 1000
 run_simulation <- function() {
   
   # Simulate heteroscedastic errors with mean variance 100 and variance of the variances = 50
-  error_variances <- rnorm(n, 100, sqrt(50)) # Variance of each error term
-  variance_gamma <- rgamma(n, shape=200, rate=2)
-  e <- rnorm(n, mean = 0, error_variances)  # Simulated errors with heteroscedasticity
+  error_variances <- abs(rnorm(n, 100, sqrt(50))) # Variance of each error term
+  error_variances_gamma <- rgamma(n, 200, rate = 2)
+  e <- rnorm(n, mean = 0, sqrt(error_variances))  # Simulated errors with heteroscedasticity
   
   # Generate Y values under null hypothesis (beta_1 = 0)
   Y <- 30 + e
