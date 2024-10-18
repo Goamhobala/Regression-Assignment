@@ -283,8 +283,13 @@ p_value
 # Question 4
 ```{r, echo=FALSE}
 # Question4
+data_tidy_air_quality$industrial_activity <- relevel(factor(data_tidy_air_quality$industrial_activity), ref="None")
 multi_model <- lm(particulate_matter ~ . + temperature:humidity, data=data_tidy_air_quality)
 estimates <- as.data.frame(summary(multi_model)$coefficients)
+colnames(estimates)[4] <- "P-value"
+summary_table <- kable(estimates, digits = 4, align="c", caption="Summary of the Model") |>
+  kable_styling(font_size = 12)
+
 confint_df <- as.data.frame(confint(multi_model))
 confint_df$Estimate <- as.numeric(estimates$Estimate)
 confint_rows <-row.names(confint_df)
@@ -294,6 +299,7 @@ confint_df_reordered <- confint_df[row_orders,c("2.5 %", "Estimate", "97.5 %")]
 confint_table <- kable(confint_df_reordered, digits = 4, align="c", caption="Confidence Interval for each Coefficient") |>
   kable_styling(font_size = 12) |>
   pack_rows(index= c("Intercept"=1, "Traffic Density"=1, "Industrial Activity"=3, "Natural Factors" = 4, "Day of Week"=6, "Holiday"=1, "Urban Greenery"=1))
+summary_table
 confint_table
 ```
 
@@ -362,7 +368,7 @@ model_restricted <- update(model_unrestricted, .~.
                            - day_of_week)
 anova(model_restricted, model_unrestricted)
 ```
-The P value is 0.7735, indicating that there is no evidence that supports rejecting the null hypothesis.
+The P value is 0.7735, indicating that we cannot reject the null hypothesis at 5% significance level.
 
 We do the same for industrial activity, taking No Activity as the reference category to test for the set of hypothesis:
 \[
@@ -380,15 +386,33 @@ model_restricted <- lm(particulate_matter ~ . - industrial_activity,
                        data_tidy_air_quality)
 anova(model_restricted, model_unrestricted)
 ```
-We obtain a P-value of 0.0707, suggesting that there's no evidence that supports rejecting the null hypothesis at 5% significance level.
+We obtain a P-value of 0.0707, suggesting that we cannot reject the null hypothesis at 5% significance level.
 
 ## Intepretation
-From the summary output and the F test for Natural Factors, we get that only Moderate Industrial Activity (p-value: 0.03), Traffic Density (p-value: 0.0155), Urban Greenery (p-value: < 0.0001), and Humidity (p-value: < 0.0001) have a significant effect (p value less than or equal to 0.05) on the concentration of particulate matters.
+From the hypothesis tests above, we concluded that Humidity (p-value: < 0.0001) has a significant effect (p-value less than or equal to 0.05) on the concentration of particulate matter. However, from the summary output, which conducts t-tests on the individual coefficients of the model, we found that Moderate Industrial Activity (p-value: 0.03), Traffic Density (p-value: 0.0155), and Urban Greenery (p-value: < 0.0001) also have significant effects on the concentration of particulate matter. Furthermore, looking at the confidence interval table, it seems that High Industrial Activity also has an effect on concentration levels, despite having a p-value of 0.06, which indicates no significant effect at the 5% significance level.
 
-The average increase in concentration of particulate matter by Moderate Industrial Activity is estimated to be 6.4545 $\frac{\mu g}{m^3}$(CI95%: 0.6047, 12.3043), indicating a positive association between the two factors, although the amount of increase is unclear as the confidence interval is quite wide. The average increase in concentration of particulate matter caused by Traffic Density, that is one extra vehicle per hour, is estimated to be 0.0799 $\frac{\mu g}{m^3}$ (CI95%: 0.0155, 0.1444), indicating a positive association. The average decrease in concentration of particulate matter caused by a unit increase in the percentage of area covered by Urban Greenery is estimated to be 0.2954 $\frac{\mu g}{m^3}$ (CI95%:-0.4142, -0.1766), indicating a negative association between the two. The effect of humidity interacts with the effects of temperature. Using the anova model, we can only examine the effects of humidity and humidity:temperature separately.
+The average increase in concentration of particulate matter due to Moderate Industrial Activity is estimated to be 6.4545 $μg/m^3$ (95% CI: 0.6047, 12.3043), while holding all other variables constant. This indicates a positive association between moderate industrial activity and particulate matter concentration, although the precise effect is unclear, as the confidence interval is quite wide. A similar interpretation applies to High Industrial Activity, which causes an estimated average increase in particulate matter concentration of 5.3652 $μg/m^3$ (95% CI: -0.2503, 10.9806). Although this confidence interval includes zero, the fact that most of the interval is positive hints at a potential positive correlation.
+
+The average increase in particulate matter concentration caused by Traffic Density—that is, one additional vehicle per hour, while holding all other explanatory variables constant—is estimated to be 0.0799 $μg/m^3$ (95% CI: 0.0155, 0.1444), indicating a positive correlation.
+
+The average decrease in particulate matter concentration due to a one-unit increase in the percentage of Urban Greenery is estimated to be 0.2954 $μg/m^3$ (95% CI: -0.4142, -0.1766), indicating a strong negative association between urban greenery and particulate matter concentration.
+
+The effect of humidity interacts with temperature in the model, but we can only examine these effects separately. Holding other variables constant, the estimated increase in particulate matter concentration caused by a one-unit increase in humidity is 0.2 $μg/m^3$ (95% CI: -0.1111, 0.4962), suggesting that, on average, increased humidity leads to higher particulate matter concentration. However, because the confidence interval includes negative values, this inference is less robust, and might just be a result of random chance. The interaction between humidity and temperature has a similar effect: an estimated increase of 0.0061 $μg/m^3$ (95% CI: -0.0088, 0.201). Again, the confidence interval includes negative values, making the result less significant.
+
+Despite these findings, the F-test on humidity suggests a different conclusion. The p-value for humidity is extremely small (< 0.0001), indicating that, overall, humidity does have an effect on particulate matter concentration. However, we cannot precisely determine the magnitude of this effect based solely on the individual confidence intervals.
+
+# Conclusion
+In this part of the report, we explored the effects of various factors on the concentration of particulate matter. Our analysis found that humidity, moderate-level industrial activity, high-level industrial activity, and traffic density tend to increase the concentration of particulate matter. In contrast, the percentage of area covered by urban greenery was found to decrease particulate matter concentration.
+
+It is well-known that high concentrations of particulate matter can lead to serious health issues. Based on these findings, we recommend that city planners carefully consider the levels of industrial activity and traffic density permitted in urban areas. A balanced approach is necessary to weigh the economic benefits of industrial development against the health of citizens. To control particulate matter concentrations, one effective strategy is to increase the percentage of urban areas covered by greenery.
+
+Further research on balancing economic development and public health is essential, as well as other effective strategies to mitigate high particulate matters level. While industrial development is necessary for economic growth, ensuring the health and well-being of the population is equally critical.
 
 # part 2
-## Scenario A
+
+For reference, we first calculate the type I rate without breaking any of the model assumptions. We know a prior that the response variable is not correlated with temperature, as we have artificially constructed the response variable to be $30 + e$, where e is just some random noises. Therefore, we expect the type I error rate to be very closed to 0.05.
+
+
 
 ## Scenario A:
 ### Methodology
@@ -401,12 +425,12 @@ The errors will be sampled from a uniform distribution where $e \sim U(a,b)$ wit
 
 For a uniform distribution $e \sim U(a,b)$ with a variance $\sigma^2$ = 100, $Var(e) = \frac{(b-a)^2}{12}$. Solving for $a$ and $b$ we get $a = -17.32$ and $b= 17.32$
 
-To simulate our data, we created a function 'run_simulation' which runs a simulation once. In a simulation, we used _runif(length(temperature), min = a, max = b)_   to generate random errors. Next calculated $Y_{i}=30 + e$ as the vector of response variables for the trial. We then used the lm function to fit our regression model. We extracted p values from our model, and ran _ifelse_ statement to check whether our null hypothesis was rejected or not, at 5% significance level. Then we used the _replicate()_ function to run the simulation 1000 times. Finally, we counted the number of null hypothesis rejected and we observed that our type 1 error rate for this scenario is 0.043 _0.054_
+To simulate our data, we created a function 'run_simulation' which runs a simulation once. In a simulation, we used _runif(length(temperature), min = a, max = b)_   to generate random errors. Next calculated $Y_{i}=30 + e$ as the vector of response variables for the trial. We then used the lm function to fit our regression model. We extracted p values from our model, and ran _ifelse_ statement to check whether our null hypothesis was rejected or not, at 5% significance level. Then we used the _replicate()_ function to run the simulation 1000 times. Finally, we counted the number of null hypothesis rejected and we observed that our type 1 error rate for this scenario is 0.044 
 
 ### Results
 Type I error is the probability of incorrectly rejecting the null hypothesis when it is true (false positive). Under the null hypothesis, the expected Type I error rate should be equal to the chosen significance level, typically 0.05. 
 
-We have found that the Type I error rate is 0.044, which is less than the expected 0.05. This is because a uniform distribution is bounded, meaning that values drawn from it are more tightly spread compared to values drawn from a normal distribution, which can take on more extreme values due to its unbounded nature. This results in the simulated error term, and thus the response variable, having less variation. This leads to $\beta_1$ being less likely to deviate from zero, as stated by the null hypothesis.
+We have found that the Type I error rate is 0.044, which is less than the expected 0.05. This can be partly explained by that uniform distributions are bounded, meaning that values drawn from it are more tightly spread compared to values drawn from a normal distribution, which can take on more extreme values due to its unbounded nature. This results in the simulated error term, and thus the response variable, having less variation. This leads to $\beta_1$ being less likely to deviate from zero, as stated by the null hypothesis. However, linear models are known to be fairly stable
 
 For interest's sake, if we increase the number of simulations to 10000, the Type I error rate becomes 0.0501, which is much closer to the expected 0.05. However, if we fix the number of simulations to 1000 and reduce each sample size to only 3 observations, the Type I error rate drops to 0.036, which is much smaller than the expected 0.05.
 
@@ -431,12 +455,12 @@ b <- 17.32
 run_simulation <- function() {
   
   # Generate error term e ~ Uniform(a, b)
-  e <- runif(length(temperature), min = a, max = b)
-  e_small<-runif(3, a, b)
-  e_norm <- rnorm(length(temperature), 0, var(temperature))
+  e_unif <- runif(length(temperature), min = a, max = b)
+  e_unif_small<-runif(3, a, b)
+  e_norm <- rnorm(3, 0, 10)
   
   # Generate Y = 30 + e (since b1 = 0)
-  Y <- 30 + e
+  Y <- 30 + e_unif
   
   # Fit the linear model Y = b0 + b1 * temperature
   model <- lm(Y ~ temperature)
@@ -470,11 +494,12 @@ Again we created a single function to run a single simulation. In each simulatio
 
 
 ### Results
-The observed type 1 error rate is 0.046, less than the expected 0.05. This is caused by the heteroscedasticity we intentionally introduced to the model. Constant variance is one of the key assumptions for the Gauss-Markov theorem. By breaking the assumption, the ordinary least square estimate(OLS) for $\beta_1$, $\hat{\beta_1}$ is no longer guaranteed to be the best  linear unbiased estimate(BLUE), thereby making the type I error rate inaccurate. As a side note, based on empirical results, increasing the variability of error's variances actually make the type I error rate closer to 0.05. The reason is way beyond our knowledge but might have something to do with Berry-Esseen Theorem based on our failed attempt at searching for an answer.
+The observed type 1 error rate is 0.046, less than the expected 0.05. This is caused by the heteroscedasticity we intentionally introduced to the model. Constant variance is one of the key assumptions for the Gauss-Markov theorem. By breaking the assumption, the ordinary least square estimate(OLS) for $\beta_1$, $\hat{\beta_1}$ is no longer guaranteed to be the bestlinear unbiased estimate(BLUE), thereby making the type I error rate inaccurate. As a side note, based on empirical results, increasing the variability of error's variances actually make the type I error rate closer to 0.05. The reason is way beyond our knowledge but might have something to do with Berry-Esseen Theorem based on our failed attempt at searching for an answer :(.
 ```{r include=FALSE}
 # For reproducibility
 
 # Number of observations in temperature data
+temperature <- temperature[1:5]
 n <- length(temperature)
 # Number of simulations
 n_simulations <- 1000
@@ -515,9 +540,9 @@ type_1_error_rate
 ## Scenario C:
 
 ### Methodology and discussion of results for Scenario C:
-Using our function again, we replicate 1000 simulations,but this time we test the dependence of errors in our model. To generate Correlated errors in our model we, use the provided function given to us. As above we repeated the same steps in order to obtain the proportion of the number of times our null hypothesis  was incorrectly rejected. OUr type 1 errot rate was 0.053.
+Using our function again, we replicate 1000 simulations,but this time we test the dependence of errors in our model. To generate Correlated errors in our model we, use the provided function given to us. As above we repeated the same steps in order to obtain the proportion of the number of times our null hypothesis  was incorrectly rejected. Our type 1 errot rate was 0.053.
 
-Autocorrelation violates the assumption of independent errors in linear regression. This can lead to incorrect standard errors for the regression coefficients, making hypothesis tests less reliable.
+Autocorrelation violates the assumption of independent errors in linear regression. Again, independence of the error terms is another key assumption of the Gauss-Markov Theorem. Breaking the assumptions lead to the ordinary least square (OLS) estimator for $\beta_1$, $\hat{\beta_1}$, not necessarily being the best linear unbiased estimator (BLUE), making the inferences on $\beta_1$ inaccurate.
 
 Typically, autocorrelated errors inflate Type I errors if unaccounted for because the model underestimates the true error variability. However, depending on the specific pattern of autocorrelation and sample size, this effect can vary.
 ```{r include=FALSE}
@@ -573,3 +598,4 @@ type_1_error_rate <- mean(reject_null)
 type_1_error_rate
 ```
 
+## Conclusion
