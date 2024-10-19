@@ -29,7 +29,6 @@ header-includes:
  \floatplacement{figure}{H}
   \usepackage{caption}
   \captionsetup[figure]{font=scriptsize}
-
 output:
   pdf_document:
     
@@ -286,9 +285,6 @@ p_value
 data_tidy_air_quality$industrial_activity <- relevel(factor(data_tidy_air_quality$industrial_activity), ref="None")
 multi_model <- lm(particulate_matter ~ . + temperature:humidity, data=data_tidy_air_quality)
 estimates <- as.data.frame(summary(multi_model)$coefficients)
-colnames(estimates)[4] <- "P-value"
-summary_table <- kable(estimates, digits = 4, align="c", caption="Summary of the Model") |>
-  kable_styling(font_size = 12)
 
 confint_df <- as.data.frame(confint(multi_model))
 confint_df$Estimate <- as.numeric(estimates$Estimate)
@@ -299,9 +295,26 @@ confint_df_reordered <- confint_df[row_orders,c("2.5 %", "Estimate", "97.5 %")]
 confint_table <- kable(confint_df_reordered, digits = 4, align="c", caption="Confidence Interval for each Coefficient") |>
   kable_styling(font_size = 12) |>
   pack_rows(index= c("Intercept"=1, "Traffic Density"=1, "Industrial Activity"=3, "Natural Factors" = 4, "Day of Week"=6, "Holiday"=1, "Urban Greenery"=1))
-summary_table
+#summary_table
 confint_table
+
+
+
+
+estimates <- estimates[-c(1),]
+colnames(estimates)[4] <- "P-value"
+
+estimates.rows <- row.names(estimates)
+row_orders = c(estimates.rows[1:7], "temperature:humidity", estimates.rows[9:15])
+
+estimates_df_reordered <- estimates[row_orders,]
+summary_table <- kable(estimates_df_reordered, digits = 4, align="c", caption="Summary of the Model") |>
+  kable_styling(font_size = 12)
+summary_table
+
 ```
+
+
 
 ## Hypothesis Testing
 We'd like to perform hypothesis tests on the following variables: Temperature, Humidity, Industrial Levels, and Day of Week.
@@ -391,20 +404,20 @@ We obtain a P-value of 0.0707, suggesting that we cannot reject the null hypothe
 ## Intepretation
 From the hypothesis tests above, we concluded that Humidity (p-value: < 0.0001) has a significant effect (p-value less than or equal to 0.05) on the concentration of particulate matter. However, from the summary output, which conducts t-tests on the individual coefficients of the model, we found that Moderate Industrial Activity (p-value: 0.03), Traffic Density (p-value: 0.0155), and Urban Greenery (p-value: < 0.0001) also have significant effects on the concentration of particulate matter. Furthermore, looking at the confidence interval table, it seems that High Industrial Activity also has an effect on concentration levels, despite having a p-value of 0.06, which indicates no significant effect at the 5% significance level.
 
-The average increase in concentration of particulate matter due to Moderate Industrial Activity is estimated to be 6.4545 $μg/m^3$ (95% CI: 0.6047, 12.3043), while holding all other variables constant. This indicates a positive association between moderate industrial activity and particulate matter concentration, although the precise effect is unclear, as the confidence interval is quite wide. A similar interpretation applies to High Industrial Activity, which causes an estimated average increase in particulate matter concentration of 5.3652 $μg/m^3$ (95% CI: -0.2503, 10.9806). Although this confidence interval includes zero, the fact that most of the interval is positive hints at a potential positive correlation.
+The average increase in concentration of particulate matter due to Moderate Industrial Activity is estimated to be 6.4545 $\mu g/m^3$ (95% CI: 0.6047, 12.3043), while holding all other variables constant. This indicates a positive association between moderate industrial activity and particulate matter concentration, although the precise effect is unclear, as the confidence interval is quite wide. A similar interpretation applies to High Industrial Activity, which causes an estimated average increase in particulate matter concentration of 5.3652 $\mu g/m^3$ (95% CI: -0.2503, 10.9806). Although this confidence interval includes zero, the fact that most of the interval is positive hints at a potential positive correlation.
 
-The average increase in particulate matter concentration caused by Traffic Density—that is, one additional vehicle per hour, while holding all other explanatory variables constant—is estimated to be 0.0799 $μg/m^3$ (95% CI: 0.0155, 0.1444), indicating a positive correlation.
+The average increase in particulate matter concentration caused by Traffic Density—that is, one additional vehicle per hour, while holding all other explanatory variables constant—is estimated to be 0.0799 $\mu g/m^3$ (95% CI: 0.0155, 0.1444), indicating a positive correlation.
 
-The average decrease in particulate matter concentration due to a one-unit increase in the percentage of Urban Greenery is estimated to be 0.2954 $μg/m^3$ (95% CI: -0.4142, -0.1766), indicating a strong negative association between urban greenery and particulate matter concentration.
+The average decrease in particulate matter concentration due to a one-unit increase in the percentage of Urban Greenery is estimated to be 0.2954 $\mu g/m^3$ (95% CI: -0.4142, -0.1766), indicating a strong negative association between urban greenery and particulate matter concentration.
 
-The effect of humidity interacts with temperature in the model, but we can only examine these effects separately. Holding other variables constant, the estimated increase in particulate matter concentration caused by a one-unit increase in humidity is 0.2 $μg/m^3$ (95% CI: -0.1111, 0.4962), suggesting that, on average, increased humidity leads to higher particulate matter concentration. However, because the confidence interval includes negative values, this inference is less robust, and might just be a result of random chance. The interaction between humidity and temperature has a similar effect: an estimated increase of 0.0061 $μg/m^3$ (95% CI: -0.0088, 0.201). Again, the confidence interval includes negative values, making the result less significant.
+The effect of humidity interacts with temperature in the model, but we can only examine these effects separately. Holding other variables constant, the estimated increase in particulate matter concentration caused by a one-unit increase in humidity is 0.2 $\mu g/m^3$ (95% CI: -0.1111, 0.4962), suggesting that, on average, increased humidity leads to higher particulate matter concentration. However, because the confidence interval includes negative values, this inference is less robust, and might just be a result of random chance. The interaction between humidity and temperature has a similar effect: an estimated increase of 0.0061 $\mu g/m^3$ (95% CI: -0.0088, 0.201). Again, the confidence interval includes negative values, making the result less significant.
 
 Despite these findings, the F-test on humidity suggests a different conclusion. The p-value for humidity is extremely small (< 0.0001), indicating that, overall, humidity does have an effect on particulate matter concentration. However, we cannot precisely determine the magnitude of this effect based solely on the individual confidence intervals.
 
 # Conclusion
 In this part of the report, we explored the effects of various factors on the concentration of particulate matter. Our analysis found that humidity, moderate-level industrial activity, high-level industrial activity, and traffic density tend to increase the concentration of particulate matter. In contrast, the percentage of area covered by urban greenery was found to decrease particulate matter concentration.
 
-It is well-known that high concentrations of particulate matter can lead to serious health issues. Based on these findings, we recommend that city planners carefully consider the levels of industrial activity and traffic density permitted in urban areas. A balanced approach is necessary to weigh the economic benefits of industrial development against the health of citizens. To control particulate matter concentrations, one effective strategy is to increase the percentage of urban areas covered by greenery.
+It is well-known that high concentrations of particulate matter can lead to serious health issues. Based on these findings, we recommend that city planners to carefully consider the levels of industrial activity and traffic density permitted in urban areas. A balanced approach is necessary to weigh the economic benefits of industrial development against the health of citizens. To control particulate matter concentrations, one effective strategy is to increase the percentage of urban areas covered by greenery.
 
 Further research on balancing economic development and public health is essential, as well as other effective strategies to mitigate high particulate matters level. While industrial development is necessary for economic growth, ensuring the health and well-being of the population is equally critical.
 
