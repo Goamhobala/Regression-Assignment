@@ -159,18 +159,42 @@ Plots of categorical variables against Particulate matter
 ### Visual Representation of Relationship between Categorial Variables
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-# Mosaic plot for industrial_activity and day_of_week
-mosaic(~ data_tidy_air_quality$industrial_activity + data_tidy_air_quality$day_of_week, data = data_tidy_air_quality, main = "Mosaic Plot: Industrial Activity vs Day of Week")
-mosaic(~ data_tidy_air_quality$industrial_activity + data_tidy_air_quality$holiday, data = data_tidy_air_quality, main = "Mosaic Plot: Industrial Activity vs Holiday")
+p1 <- ggplot(data_tidy_air_quality, aes(x = data_tidy_air_quality$day_of_week, fill = data_tidy_air_quality$industrial_activity)) +
+  geom_bar(position = "fill") + 
+  labs(title = "Stacked Bar Chart of Industrial Activity and Days of the week ",
+       x = "day of the Week",
+       y = "Proportion Particulate Matter") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+print(p1)
+
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+p2 <- ggplot(data_tidy_air_quality, aes(x = data_tidy_air_quality$day_of_week, fill = data_tidy_air_quality$holiday)) +
+  geom_bar(position = "fill") +  
+  labs(title = "Stacked Bar Chart of day of the Week and holiday ",
+       x = "Day of the Week",
+       y = "Proportion Of Particulate Matter") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+print(p2)
 ```
 
 
-```{r echo=FALSE}
-mosaic(~ data_tidy_air_quality$day_of_week + data_tidy_air_quality$holiday, data = data_tidy_air_quality, main = "Mosaic Plot:Day of the Week vs Holiday")
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+p3 <- ggplot(data_tidy_air_quality, aes(x = data_tidy_air_quality$industrial_activity, fill = data_tidy_air_quality$holiday)) +
+  geom_bar(position = "fill") +  
+  labs(title = "Stacked Bar Chart of Industrial Activity and holiday ",
+       x = "Industrial Activity",
+       y = "Proportion of Particulate Matter") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+print(p3)
 ```
 
 ### Comments
@@ -440,7 +464,7 @@ It is well-known that high concentrations of particulate matter can lead to seri
 
 Further research on balancing economic development and public health is essential, as well as other effective strategies to mitigate high particulate matters level. While industrial development is necessary for economic growth, ensuring the health and well-being of the population is equally critical.
 
-# part 2
+# Part 2
 
 For reference, we first calculate the type I rate without breaking any of the model assumptions. We know a prior that the response variable is not correlated with temperature, as we have artificially constructed the response variable to be $30 + e$, where e is just some random noises. Therefore, we expect the type I error rate to be very closed to 0.05.
 
