@@ -32,6 +32,7 @@ header-includes:
   \captionsetup[figure]{font=scriptsize}
 output:
   pdf_document:
+    extra_dependencies: ["float"]
     
     fig_caption: true
     number_sections: true
@@ -59,6 +60,8 @@ data("data_tidy_air_quality", package = "DataTidyRodoSTA2005S")
 library(ggplot2)
 library(tidyr)
 library(kableExtra)
+library(vcd)
+
 ```
 
 # Part One : Analysis
@@ -98,6 +101,7 @@ ggplot(data_tidy_air_quality, aes(x=particulate_matter))+
   geom_histogram(fill="deepskyblue3", color="black", binwidth = 3, aes(y=..density..))+
   stat_function(fun=dnorm, args=list(mean=mean_particle, sd=sd_particle), color="firebrick4", size=1.2)+
   labs(title="Density Plot of Particulate Matter", y="Density", x="Particulate Matter")
+par(mfrow = c(1, 1))
 ```
 
 ### Pairwsie Plots
@@ -106,6 +110,7 @@ ggplot(data_tidy_air_quality, aes(x=particulate_matter))+
 continuous_vars <- data_tidy_air_quality[, sapply(data_tidy_air_quality, is.numeric)]
 pairs(continuous_vars, main = "Pairwise Scatterplots of Continuous Variables", col="deepskyblue3")
 ```
+Scatter plot of continuous variables against each other
 
 ### Categorial Variable Plots
 
@@ -120,39 +125,52 @@ data_tidy_air_quality$day_of_week <- factor(data_tidy_air_quality$day_of_week,
 data_tidy_air_quality$holiday <- factor(data_tidy_air_quality$holiday, 
                            levels = c("Yes", "No"))
 
-categorical_vars <- names(data_tidy_air_quality)[sapply(data_tidy_air_quality, is.factor)]
-colours_vector <- c("industrial_activity", "day_of_week", "holiday")
+p1 <- ggplot(data_tidy_air_quality, aes(x = data_tidy_air_quality$industrial_activity, y = data_tidy_air_quality$particulate_matter)) +
+  geom_boxplot() +
+  labs(title = "Particulate Matter Levels by Industrial Activity",
+       x = "Industrial Activity",
+       y = "Particulate Matter Levels") +
+  theme_minimal()
 
-for (var in categorical_vars) {
-  plt<- ggplot(data_tidy_air_quality, aes_string(x = var, y = "particulate_matter")) +
-    geom_boxplot(fill="deepskyblue3", color="firebrick4", size=1) +
-    labs(title = paste("Particulate Matter vs", var),
-         x = var,
-         y = "Particulate Matter") +
-    theme_minimal() 
-    
-  
-  print(plt)  # Print the plot
-}
+# Plot particulate matter against day of the week
+p2 <- ggplot(data_tidy_air_quality, aes(x = data_tidy_air_quality$day_of_week, y = data_tidy_air_quality$particulate_matter)) +
+  geom_boxplot() +
+  labs(title = "Particulate Matter Levels by Day of the Week",
+       x = "Day of the Week",
+       y = "Particulate Matter Levels") +
+  theme_minimal()
+
+p3 <- ggplot(data_tidy_air_quality, aes(x =data_tidy_air_quality$holiday , y = data_tidy_air_quality$particulate_matter)) +
+  geom_boxplot() +
+  labs(title = "Particulate Matter Levels by Day of the Week",
+       x = "Day of the Week",
+       y = "Particulate Matter Levels") +
+  theme_minimal()
+
+# Display plots
+library(gridExtra)
+grid.arrange(p1, p2,p3, ncol = 2)
+
 ```
+Plots of categorical variables against Particulate matter
+
+\newpage
 
 ### Visual Representation of Relationship between Categorial Variables
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-for (i in 1:(length(categorical_vars) - 1)) {
-  for (j in (i + 1):length(categorical_vars)) {
-    # Create the plot
-    p <- ggplot(data_tidy_air_quality, aes_string(x = categorical_vars[i], fill = categorical_vars[j])) +
-      geom_bar(position = "fill") +  # Use "fill" to make it a stacked bar chart (proportions)
-      labs(title = paste("Stacked Bar Chart of", categorical_vars[i], "and", categorical_vars[j]),
-           x = categorical_vars[i],
-           y = "Proportion") +
-      theme_minimal() +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1))
-    
-    # Print the plot
-    print(p)
-  }
-}
+
+# Mosaic plot for industrial_activity and day_of_week
+mosaic(~ data_tidy_air_quality$industrial_activity + data_tidy_air_quality$day_of_week, data = data_tidy_air_quality, main = "Mosaic Plot: Industrial Activity vs Day of Week")
+mosaic(~ data_tidy_air_quality$industrial_activity + data_tidy_air_quality$holiday, data = data_tidy_air_quality, main = "Mosaic Plot: Industrial Activity vs Holiday")
+```
+
+```{r echo=FALSE}
+
+```
+
+
+```{r echo=FALSE}
+mosaic(~ data_tidy_air_quality$day_of_week + data_tidy_air_quality$holiday, data = data_tidy_air_quality, main = "Mosaic Plot:Day of the Week vs Holiday")
 ```
 
 ### Comments
@@ -613,3 +631,7 @@ type_1_error_rate
 ```
 
 ## Conclusion
+
+
+
+
