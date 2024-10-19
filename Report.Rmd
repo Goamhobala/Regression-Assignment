@@ -2,6 +2,7 @@
 # The two fields that are not in the elsevier format are:
 title: STA2005S - Regression Assignment
 date: "`r Sys.Date()`"
+
 author:
   - name: Jing Yeh
     email: yhxjin001@myuct.ac.za
@@ -103,7 +104,7 @@ ggplot(data_tidy_air_quality, aes(x=particulate_matter))+
 
 ```{r echo=FALSE, warning=FALSE}
 continuous_vars <- data_tidy_air_quality[, sapply(data_tidy_air_quality, is.numeric)]
-pairs(continuous_vars, main = "Pairwise Scatterplots of Continuous Variables",)
+pairs(continuous_vars, main = "Pairwise Scatterplots of Continuous Variables", col="deepskyblue3")
 ```
 
 ### Categorial Variable Plots
@@ -120,11 +121,11 @@ data_tidy_air_quality$holiday <- factor(data_tidy_air_quality$holiday,
                            levels = c("Yes", "No"))
 
 categorical_vars <- names(data_tidy_air_quality)[sapply(data_tidy_air_quality, is.factor)]
-
+colours_vector <- c("industrial_activity", "day_of_week", "holiday")
 
 for (var in categorical_vars) {
   plt<- ggplot(data_tidy_air_quality, aes_string(x = var, y = "particulate_matter")) +
-    geom_boxplot() +
+    geom_boxplot(fill="deepskyblue3", color="firebrick4", size=1) +
     labs(title = paste("Particulate Matter vs", var),
          x = var,
          y = "Particulate Matter") +
@@ -237,7 +238,7 @@ cat("\nF-statistic:",F_statistic, "on 1 and", n-2, "DF")
 #differences in values and lm function values are due to the rounding.
 ```
 
-## Hpothesis Test
+## Hypothesis Test
 
 ```{r echo=TRUE}
 # Calculate F-statistic and p-value manually

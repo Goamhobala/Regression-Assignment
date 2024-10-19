@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.10.16)  19 OCT 2024 10:00
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.10.16)  19 OCT 2024 12:12
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -692,11 +692,11 @@ LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10> not available
 
 [12] [13]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 415.
+(Font)              <10> on input line 416.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 415.
+(Font)              <7> on input line 416.
 
-Overfull \hbox (10.32634pt too wide) detected at line 469
+Overfull \hbox (10.32634pt too wide) detected at line 470
 [][]
  []
 
@@ -733,7 +733,7 @@ Here is how much of TeX's memory you used:
  14 hyphenation exceptions out of 8191
  89i,10n,93p,836b,612s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </Users/youyasushi/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></Users/youyasushi/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></Users/youyasushi/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx9.pfb></Users/youyasushi/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></Users/youyasushi/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></Users/youyasushi/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi9.pfb></Users/youyasushi/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></Users/youyasushi/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></Users/youyasushi/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb></Users/youyasushi/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr5.pfb></Users/youyasushi/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></Users/youyasushi/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr9.pfb></Users/youyasushi/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></Users/youyasushi/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></Users/youyasushi/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></Users/youyasushi/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></Users/youyasushi/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></Users/youyasushi/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtti10.pfb>
-Output written on Report.pdf (18 pages, 675319 bytes).
+Output written on Report.pdf (18 pages, 675407 bytes).
 PDF statistics:
  357 PDF objects out of 1000 (max. 8388607)
  281 compressed objects within 3 object streams
